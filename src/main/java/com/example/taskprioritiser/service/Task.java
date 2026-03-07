@@ -1,6 +1,6 @@
-package com.example.taskprioritiser;
+package com.example.taskprioritiser.service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 public class Task {
@@ -11,9 +11,9 @@ public class Task {
     int effort;
     int impact;
     int urgency;
-    LocalDateTime deadline;
+    Instant deadline;
 
-    public Task(String description, int effort, int impact, int urgency, LocalDateTime deadline) {
+    public Task(String description, int effort, int impact, int urgency, Instant deadline) {
         this.description = description;
         this.effort = effort;
         this.impact = impact;
@@ -21,6 +21,7 @@ public class Task {
         this.deadline = deadline;
     }
 
+    // if added later than this too should be optional
     public int getTaskId() {
         return taskId;
     }
@@ -57,11 +58,11 @@ public class Task {
         this.urgency = urgency;
     }
 
-    public Optional<LocalDateTime> getDeadline() {
+    public Optional<Instant> getDeadline() {
         return Optional.of(deadline);
     }
 
-    public void setDeadline(LocalDateTime deadline) {
+    public void setDeadline(Instant deadline) {
         this.deadline = deadline;
     }
 }
