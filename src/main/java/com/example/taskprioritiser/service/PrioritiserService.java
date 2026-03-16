@@ -8,7 +8,6 @@ public class PrioritiserService {
 
     private final TaskService taskService;
 
-
     public PrioritiserService(TaskService taskService) {
         this.taskService = taskService;
     }
@@ -16,9 +15,6 @@ public class PrioritiserService {
     public void getPrioritisedTasks(){
         taskService.getAllTasks();
         // gets weights for each score
-        // maybe score is enum + int
-
     }
-
 
 }

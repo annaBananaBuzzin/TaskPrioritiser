@@ -1,6 +1,5 @@
 package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.service.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,48 +8,50 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.List;
 
-public interface TaskRepository extends JpaRepository<Task, Long> {
-    // TODO at what point is the task id generated
+public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
 
     // FYI – Using native queries purely as a reminder
 
-    // where to add tbe persistnce context of the @transactional annotation?
-
     // TODO - improve table dynamics by creating a table for each score and connecting to task
+    // TODO - whats the deal with value mapping and entities
 
 
     @Modifying
-    @Query(value = "INSERT INTO task (task_id, desciption, effort, impact, urgency, deadline) " +
-            "VALUES (:task_id, :desciption, :effort, :impact, :urgency, :deadline)", nativeQuery = true)
-    void insertTask(@Param("task_id")int taskId, @Param("description")String description, @Param("effort")int effort, @Param("impact")int impact, @Param("urgency")int urgency, @Param("deadline")Instant deadline);
+    @Query(value = "INSERT INTO task (description, effort, impact, urgency, deadline) " +
+            "VALUES (:description, :effort, :impact, :urgency, :deadline) RETURNING task_id", nativeQuery = true)
+    Long insertTask(@Param("description")String description, @Param("effort")int effort, @Param("impact")int impact, @Param("urgency")int urgency, @Param("deadline")Instant deadline);
 
     @Modifying
-    @Query(value = "UPDATE task (desciption, effort, impact, urgency, deadline) " +
-            "VALUES (:desciption, :effort, :impact, :urgency, :deadline)" +
+    @Query(value = "UPDATE task SET description = :description " +
             "WHERE task_id = :task_id", nativeQuery = true)
-    void updateTask(@Param("task_id")int taskId, @Param("description")String description, @Param("effort")int effort, @Param("impact")int impact, @Param("urgency")int urgency, @Param("deadline")Instant deadline);
+    void updateDescription(@Param("task_id")Long taskId, @Param("description")String description);
 
     @Modifying
-    @Query(value = "UPDATE task (desciption) " +
-            "VALUES (:desciption)" +
+    @Query(value = "UPDATE task SET effort = :effort" +
             "WHERE task_id = :task_id", nativeQuery = true)
-    void updateDescription(@Param("task_id")int taskId, @Param("description")String description);
+    void updateEffortScore(@Param("task_id")Long taskId, @Param("effort")int effort);
 
     @Modifying
-    @Query(value = "UPDATE task (effort, impact, urgency) " +
-            "VALUES (:effort, :impact, :urgency)" +
+    @Query(value = "UPDATE task SET impact = :impact" +
             "WHERE task_id = :task_id", nativeQuery = true)
-    void updateScores(@Param("task_id")int taskId, @Param("effort")int effort, @Param("impact")int impact, @Param("urgency")int urgency);
+    void updateImpactScore(@Param("task_id")Long taskId, @Param("impact")int impact);
 
     @Modifying
-    @Query(value = "UPDATE task (deadline) " +
-            "VALUES (:deadline)" +
+    @Query(value = "UPDATE task SET urgency = :urgency" +
             "WHERE task_id = :task_id", nativeQuery = true)
-    void updateDeadline(@Param("task_id")int taskId, @Param("deadline")Instant deadline);
+    void updateUrgencyScore(@Param("task_id")Long taskId, @Param("urgency")int urgency);
+
+    @Modifying
+    @Query(value = "UPDATE task SET deadline = :deadline " +
+            "WHERE task_id = :task_id", nativeQuery = true)
+    void updateDeadline(@Param("task_id")Long taskId, @Param("deadline")Instant deadline);
 
     @Query(value = "SELECT * FROM task", nativeQuery = true)
-    List<Task> fetchAllTasks();
+    List<TaskEntity> fetchAllTasks();
 
     @Query(value = "SELECT * FROM task WHERE task_id = :id", nativeQuery = true)
-    Task fetchTaskById(@Param("id") int taskID);
+    TaskEntity fetchTaskById(@Param("id") Long taskID);
+
+    @Query(value = "SELECT * FROM task WHERE description = :description", nativeQuery = true)
+    TaskEntity fetchTaskByDescription(@Param("description")String description);
 }

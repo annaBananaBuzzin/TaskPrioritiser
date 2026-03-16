@@ -1,12 +1,14 @@
 package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.repsoitory.TaskEntity;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
+import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
 
 import java.time.Instant;
 import java.util.List;
 
 public class TaskService {
+
+    // TODO add logic for completeing tasks - would have a table of "outstanding tasks" fetched by a join
 
     private final TaskPersistenceService taskPersistenceService;
 
@@ -14,77 +16,55 @@ public class TaskService {
         this.taskPersistenceService = taskPersistenceService;
     }
 
-    // This will use internal Task POJO
-    // logic class is the only one that goes between
-    // think Re/Res stay in controller as that is exposed externally it should stay outside of internal logic
-    // entity stays in persistence layer
-
-    // Validation (currently duplicated until entity annotations added)
-    // the request and response objects need to be validated to
-    // ensure the other side is sending the right data and is recieveing the expected data
-    // do you create the internal object and then do the validation again?
-    // validate before or after creaton, surely you need to validate before creation
-    // but  want creation in cronller but don't want controller to hve validation
-    // the balance between forcing and good coding practice
-    // currently this is well simple so doesn't matter, good practice would depend on the situatin and wider working stule
-    // best practice – ensuring the param past is consistent for that one use case right?
-    // if service methods start accepting request dto for every type of request there may have to be an addtional endpoint
-    // where pojos start getting changed to fit other narratives
-
-    // Q: which service has the respnsibility of reating internal class
-    // Q: which service has the respobsibly of creating the entity?
-
-
-    public void createTask(Task task) {
+    // can throw illegal argument if description is not null
+    public Task createTask(NewTask newTask) {
         // Validate inputs
-        validateTaskVariables(task);
+        descriptionValidation(newTask.getDescription());
+        validateScores(newTask.getEffortScore(), newTask.getImpactScore(), newTask.getUrgencyScore());
+        deadlineValidation(newTask.getDeadline());
 
-        // Save task to repository (not implemented here)
-        taskPersistenceService.createTask(task.getTaskId(),task.getDescription(), task.getEffort(), task.getImpact(), task.getUrgency(),
-                //need to update this
-                task.getDeadline().orElse(null));
-
+        // map to entity and persist
+        Long newTaskId = taskPersistenceService.createTask(newTask.toEntityCreation());
+        return taskPersistenceService.getTask(newTaskId).map(EntityTaskMapper::toService)
+                .orElseThrow(() -> new RuntimeException("Failed to retrieve the newly created task with ID: " + newTaskId));
     }
 
-    public void updateTaskDescription(int taskID, String description) {
+    public void updateTaskDescription(Long taskID, String description) {
         descriptionValidation(description);
+        // TODO - fetch task to ensure unique
         taskPersistenceService.updateTaskDescription(taskID, description);
     }
 
-    public void updateTaskScores(int taskID, int effort, int impact, int urgency) {
-        validateScores(effort, impact, urgency);
-        taskPersistenceService.updateTaskScores(taskID, effort, impact, urgency);
+//    public void updateTaskScores(Long taskID, int effort, int impact, int urgency) {
+//        validateScores(effort, impact, urgency);
+//        taskPersistenceService.updateTaskScores(taskID, effort, impact, urgency);
+//    }
+
+    public void updateTaskScore(Long taskID, ScoreType scoreType, int value) {
+        Score newScore = scoreType.create(value);
+        updateTaskScore(taskID, newScore);
     }
 
-    public void updateTaskDeadline(int taskID, Instant deadline) {
+    public void updateTaskScore(Long taskID, Score score) {
+        scoreValidation(score);
+        taskPersistenceService.updateTaskScore(taskID, score.getType(), score.getValue());
+    }
+
+    public void updateTaskDeadline(Long taskID, Instant deadline) {
         deadlineValidation(deadline);
         taskPersistenceService.updateTaskDeadline(taskID, deadline);
     }
 
-    public void updateTask(Task task) {
-        // Validate inputs
-        validateTaskVariables(task);
-
-        taskPersistenceService.updateTask(task.getTaskId(), task.getDescription(), task.getEffort(), task.getImpact(), task.getUrgency(),
-                // need to update this once checked
-                task.getDeadline().orElse(null));
-
-    }
-
     public List<Task> getAllTasks() {
-        return taskPersistenceService.getAllTasks();
+        return taskPersistenceService.getAllTasks().stream()
+                .map(EntityTaskMapper::toService)
+                .toList();
     }
 
-    public Task getTask(int taskID) {
-        return taskPersistenceService.getTask(taskID);
-    }
-
-    private void validateTaskVariables(Task task){
-        descriptionValidation(task.getDescription());
-        validateScores(task);
-        if(task.getDeadline().isPresent()){
-            deadlineValidation(task.getDeadline().get());
-        }
+    public Task getTask(Long taskID) {
+        return taskPersistenceService.getTask(taskID)
+                .map(EntityTaskMapper::toService)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskID));
     }
 
     private void descriptionValidation(String description) {
@@ -93,28 +73,17 @@ public class TaskService {
         }
     }
 
-    private void validateScores(Task task) {
-        effortScoreValidation(task.getEffort());
-        impactScoreValidation(task.getImpact());
-        urgencyScoreValidation(task.getUrgency());
+    public void validateScores(EffortScore effortScore,ImpactScore impactScore, UrgencyScore urgencyScore) {
+        scoreValidation(effortScore);
+        scoreValidation(impactScore);
+        scoreValidation(urgencyScore);
     }
 
-    public void validateScores(int effort,int impact, int urgency){
-        effortScoreValidation(effort);
-        impactScoreValidation(impact);
-        urgencyScoreValidation(urgency);
-    }
-
-    private void effortScoreValidation(int effort) {
-        scoreValidation(effort, "Effort");
-    }
-
-    private void impactScoreValidation(int impact) {
-        scoreValidation(impact, "Impact");
-    }
-
-    private void urgencyScoreValidation(int urgency) {
-        scoreValidation(urgency, "Urgency");
+    private void scoreValidation(Score score){
+        int value = score.getValue();
+        if (value < 1 || value > 10) {
+            throw new IllegalArgumentException(score.getType() + " score must be between 1 and 10");
+        }
     }
 
     private void deadlineValidation(Instant deadline) {
@@ -123,9 +92,4 @@ public class TaskService {
         }
     }
 
-    private void scoreValidation(int score, String errorMessage) {
-        if (score < 1 || score > 10) {
-            throw new IllegalArgumentException(errorMessage + " score must be between 1 and 10");
-        }
-    }
 }

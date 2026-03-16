@@ -1,114 +1,67 @@
 package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.service.Task;
+import com.example.taskprioritiser.service.ScoreType;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
-// this is persistance layer
 public class TaskPersistenceService {
 
-    // where does id comeinto it?
-    // this should be where the entity is created
-    // eneity has the @ constraints so the validations here would be redundent in that case
+//    @PersistenceContext
+//    private EntityManager entityManager;
 
+    private final TaskRepository taskRepository;
 
-
-     private final TaskRepository taskRepository;
-
-     public TaskPersistenceService(TaskRepository taskRepository) {
+    public TaskPersistenceService(TaskRepository taskRepository) {
           this.taskRepository = taskRepository;
      }
 
-
-    public void createTask(TaskEntity taskEntity) {
-        // Validate inputs
-        validateTaskVariables(taskEntity);
-
-        // Save task to repository (not implemented here)
-        taskRepository.insertTask(taskEntity.getTaskId(),taskEntity.getDescription(), taskEntity.getEffort(), taskEntity.getImpact(), taskEntity.getUrgency(), taskEntity.getDeadline().orElse(null));
-
+     @Transactional
+    public Long createTask(TaskEntity taskEntity) {
+         validateUniqueDescription(taskEntity.getDescription());
+        return taskRepository.insertTask(taskEntity.getDescription(), taskEntity.getEffort(), taskEntity.getImpact(), taskEntity.getUrgency(), taskEntity.getDeadline());
     }
 
-    public void updateTaskDescription(int taskID, String description) {
-        descriptionValidation(description);
+    @Transactional
+    public void updateTaskDescription(Long taskID, String description) {
         taskRepository.updateDescription(taskID, description);
     }
 
-    public void updateTaskScores(int taskID, int effort, int impact, int urgency) {
-         validateScores(effort, impact, urgency);
-        taskRepository.updateScores(taskID, effort, impact, urgency);
+//    @Transactional
+//    public void updateTaskScores(Long taskID, int effort, int impact, int urgency) {
+//        taskRepository.updateScores(taskID, effort, impact, urgency);
+//    }
+
+    @Transactional
+    public void updateTaskScore(Long taskID, ScoreType scoreType, int value) {
+        switch (scoreType) {
+            case EFFORT -> taskRepository.updateEffortScore(taskID, value);
+            case IMPACT -> taskRepository.updateImpactScore(taskID, value);
+            case URGENCY -> taskRepository.updateUrgencyScore(taskID, value);
+        }
     }
 
-    public void updateTaskDeadline(int taskID, Instant deadline) {
-        deadlineValidation(deadline);
+    @Transactional
+    public void updateTaskDeadline(Long taskID, Instant deadline) {
         taskRepository.updateDeadline(taskID, deadline);
     }
 
-    public void updateTask(TaskEntity taskEntity) {
-        // Validate inputs
-        validateTaskVariables(taskEntity);
-
-        taskRepository.updateTask(taskEntity.getTaskId(), taskEntity.getDescription(), taskEntity.getEffort(), taskEntity.getImpact(), taskEntity.getUrgency(), taskEntity.getDeadline().orElse(null));
-
-    }
-
-    public List<Task> getAllTasks() {
+    @Transactional
+    public List<TaskEntity> getAllTasks() {
         return taskRepository.fetchAllTasks();
     }
 
-    public Task getTask(int taskID) {
-        return taskRepository.fetchTaskById(taskID);
+    @Transactional
+    public Optional<TaskEntity> getTask(Long taskID) {
+        return Optional.ofNullable(taskRepository.fetchTaskById(taskID));
     }
 
-    private void validateTaskVariables(TaskEntity taskEntity){
-        descriptionValidation(taskEntity.getDescription());
-        validateScores(taskEntity);
-        if(taskEntity.getDeadline().isPresent()){
-             deadlineValidation(taskEntity.getDeadline().get());
+    // As this is a column constraint, would this never happen? Should this be in the service layer?
+    private void validateUniqueDescription(String description) {
+        if (taskRepository.fetchTaskByDescription(description) != null) {
+            throw new IllegalArgumentException("Description must be unique");
         }
     }
-
-    private void descriptionValidation(String description) {
-        if (description == null || description.isEmpty()) {
-            throw new IllegalArgumentException("Description cannot be null or empty");
-        }
-    }
-
-    private void validateScores(TaskEntity taskEntity) {
-        effortScoreValidation(taskEntity.getEffort());
-        impactScoreValidation(taskEntity.getImpact());
-        urgencyScoreValidation(taskEntity.getUrgency());
-    }
-
-    public void validateScores(int effort,int impact, int urgency){
-        effortScoreValidation(effort);
-        impactScoreValidation(impact);
-        urgencyScoreValidation(urgency);
-    }
-
-    private void effortScoreValidation(int effort) {
-        scoreValidation(effort, "Effort");
-    }
-
-    private void impactScoreValidation(int impact) {
-        scoreValidation(impact, "Impact");
-    }
-
-    private void urgencyScoreValidation(int urgency) {
-        scoreValidation(urgency, "Urgency");
-    }
-
-    private void deadlineValidation(Instant deadline) {
-        if (deadline.isBefore(Instant.now())){
-            throw new IllegalArgumentException("Deadline must be in the future");
-        }
-    }
-
-    private void scoreValidation(int score, String errorMessage) {
-        if (score < 1 || score > 10) {
-            throw new IllegalArgumentException(errorMessage + " score must be between 1 and 10");
-        }
-    }
-
 }
