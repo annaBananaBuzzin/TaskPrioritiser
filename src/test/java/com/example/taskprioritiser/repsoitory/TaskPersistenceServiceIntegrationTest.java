@@ -1,6 +1,9 @@
 package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.service.ScoreType;
+import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity;
+import com.example.taskprioritiser.internal.service.repsoitory.TaskPersistenceService;
+import com.example.taskprioritiser.internal.service.repsoitory.TaskRepository;
+import com.example.taskprioritiser.internal.service.model.ScoreType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
