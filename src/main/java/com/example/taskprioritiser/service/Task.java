@@ -19,4 +19,6 @@ public class Task {
     private UrgencyScore urgencyScore;
     private Instant deadline;
 
+    // add get methods for each score value
+
 }

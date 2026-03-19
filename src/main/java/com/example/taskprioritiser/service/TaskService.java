@@ -2,10 +2,12 @@ package com.example.taskprioritiser.service;
 
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 
+@Service
 public class TaskService {
 
     // TODO add logic for completeing tasks - would have a table of "outstanding tasks" fetched by a join

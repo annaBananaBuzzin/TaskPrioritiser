@@ -17,27 +17,22 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
 
 
     @Modifying
-    @Query(value = "INSERT INTO task (description, effort, impact, urgency, deadline) " +
-            "VALUES (:description, :effort, :impact, :urgency, :deadline) RETURNING task_id", nativeQuery = true)
-    Long insertTask(@Param("description")String description, @Param("effort")int effort, @Param("impact")int impact, @Param("urgency")int urgency, @Param("deadline")Instant deadline);
-
-    @Modifying
     @Query(value = "UPDATE task SET description = :description " +
             "WHERE task_id = :task_id", nativeQuery = true)
     void updateDescription(@Param("task_id")Long taskId, @Param("description")String description);
 
     @Modifying
-    @Query(value = "UPDATE task SET effort = :effort" +
+    @Query(value = "UPDATE task SET effort = :effort " +
             "WHERE task_id = :task_id", nativeQuery = true)
     void updateEffortScore(@Param("task_id")Long taskId, @Param("effort")int effort);
 
     @Modifying
-    @Query(value = "UPDATE task SET impact = :impact" +
+    @Query(value = "UPDATE task SET impact = :impact " +
             "WHERE task_id = :task_id", nativeQuery = true)
     void updateImpactScore(@Param("task_id")Long taskId, @Param("impact")int impact);
 
     @Modifying
-    @Query(value = "UPDATE task SET urgency = :urgency" +
+    @Query(value = "UPDATE task SET urgency = :urgency " +
             "WHERE task_id = :task_id", nativeQuery = true)
     void updateUrgencyScore(@Param("task_id")Long taskId, @Param("urgency")int urgency);
 

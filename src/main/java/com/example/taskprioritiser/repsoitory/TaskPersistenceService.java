@@ -1,16 +1,15 @@
 package com.example.taskprioritiser.repsoitory;
 
 import com.example.taskprioritiser.service.ScoreType;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class TaskPersistenceService {
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
 
     private final TaskRepository taskRepository;
 
@@ -21,11 +20,13 @@ public class TaskPersistenceService {
      @Transactional
     public Long createTask(TaskEntity taskEntity) {
          validateUniqueDescription(taskEntity.getDescription());
-        return taskRepository.insertTask(taskEntity.getDescription(), taskEntity.getEffort(), taskEntity.getImpact(), taskEntity.getUrgency(), taskEntity.getDeadline());
+        TaskEntity saved = taskRepository.save(taskEntity);
+        return saved.getTaskId();
     }
 
     @Transactional
     public void updateTaskDescription(Long taskID, String description) {
+        validateUniqueDescription(description);
         taskRepository.updateDescription(taskID, description);
     }
 

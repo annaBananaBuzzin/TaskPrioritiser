@@ -43,8 +43,6 @@ public class TaskEntity {
     @Column(nullable=false)
     private int urgency;
 
-    @Min(1)
-    @Max(10)
     @Column
     private Instant deadline;
 

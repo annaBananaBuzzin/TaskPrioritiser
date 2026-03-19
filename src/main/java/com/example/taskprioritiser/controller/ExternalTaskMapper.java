@@ -11,12 +11,12 @@ public class ExternalTaskMapper {
         return new NewTask(request.getDescription(), new EffortScore(request.getEffort()), new ImpactScore(request.getImpact()), new UrgencyScore(request.getUrgency()), request.getDeadline());
     }
 
-    public static Task requestToService(TaskRequest request){
-        return new Task(request.getDescription(), request.getEffort(), request.getImpact(), request.getUrgency(), request.getDeadline());
-    }
+//    public static Task requestToService(TaskRequest request){
+//        return new Task(request.getDescription(), request.getEffort(), request.getImpact(), request.getUrgency(), request.getDeadline());
+//    }
 
     public static TaskResponse serviceToResponse(Task task){
-        return new TaskResponse(task.getTaskId(), task.getDescription(), task.getEffort(), task.getImpact(), task.getUrgency(), task.getDeadline());
+        return new TaskResponse(task.getTaskId(), task.getDescription(), task.getEffortScore().getValue(), task.getImpactScore().getValue(), task.getUrgencyScore().getValue(), task.getDeadline());
     }
 
 }
