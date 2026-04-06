@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+@Deprecated
 public interface ScoreRepository extends JpaRepository<ScoreEntity, Long> {
 
     // FYI – Using native queries purely as a reminder

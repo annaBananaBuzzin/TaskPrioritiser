@@ -1,5 +1,6 @@
 package com.example.taskprioritiser.internal.service.repsoitory.entity;
 
+import com.example.taskprioritiser.internal.service.model.ScoreType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,7 +25,8 @@ public class ScoreEntity {
 
     @NotBlank
     @Column(nullable=false, unique=true)
-    private String score;
+    // should be an entity specific enum
+    private ScoreType score;
 
     @Setter
     @Min(0)

@@ -2,6 +2,8 @@ package com.example.taskprioritiser.internal.service.repsoitory;
 
 import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity;
 import com.example.taskprioritiser.internal.service.model.ScoreType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +14,7 @@ import java.util.Optional;
 @Service
 public class TaskPersistenceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(TaskPersistenceService.class);
     private final TaskRepository taskRepository;
 
     public TaskPersistenceService(TaskRepository taskRepository) {
@@ -27,14 +30,18 @@ public class TaskPersistenceService {
 
     @Transactional
     public void updateTaskDescription(Long taskID, String description) {
-        validateUniqueDescription(description);
-        taskRepository.updateDescription(taskID, description);
-    }
+        logger.info("Before update - Getting task {}", taskID);
+        TaskEntity beforeUpdate = taskRepository.fetchTaskById(taskID);
+        logger.info("Before update - Description: {}", beforeUpdate.getDescription());
 
-//    @Transactional
-//    public void updateTaskScores(Long taskID, int effort, int impact, int urgency) {
-//        taskRepository.updateScores(taskID, effort, impact, urgency);
-//    }
+        validateUniqueDescription(description);
+        logger.info("Calling repository updateDescription for task {} with new description: {}", taskID, description);
+        taskRepository.updateDescription(taskID, description);
+
+        logger.info("After update - Getting task {} to verify", taskID);
+        TaskEntity afterUpdate = taskRepository.fetchTaskById(taskID);
+        logger.info("After update - Description: {}", afterUpdate.getDescription());
+    }
 
     @Transactional
     public void updateTaskScore(Long taskID, ScoreType scoreType, int value) {
@@ -60,6 +67,7 @@ public class TaskPersistenceService {
         return Optional.ofNullable(taskRepository.fetchTaskById(taskID));
     }
 
+    // TODO move to service layer
     // As this is a column constraint, would this never happen? Should this be in the service layer?
     private void validateUniqueDescription(String description) {
         if (taskRepository.fetchTaskByDescription(description) != null) {

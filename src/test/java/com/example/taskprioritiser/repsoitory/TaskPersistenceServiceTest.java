@@ -4,7 +4,6 @@ import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity
 import com.example.taskprioritiser.internal.service.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.internal.service.repsoitory.TaskRepository;
 import com.example.taskprioritiser.internal.service.model.ScoreType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,126 +27,148 @@ class TaskPersistenceServiceTest {
     @InjectMocks
     private TaskPersistenceService taskPersistenceService;
 
-    // TODO - change how task entity test classes are created
-    // TODO - do we wanna test the entity stuff?
-    private TaskEntity taskEntity;
-    private Long taskId = 1L;
-    private String description = "Test Task";
-    private int effort = 5;
-    private int impact = 4;
-    private int urgency = 3;
-    private Instant deadline = Instant.now().plusSeconds(3600);
-
-    @BeforeEach
-    void setUp() {
-        taskEntity = new TaskEntity(taskId, description, effort, impact, urgency, deadline);
-    }
+    private final Long taskId = 1L;
+    private final String description = "First Task";
 
     @Test
     void createTask_ShouldReturnTaskId_WhenValid() {
-        // Arrange
+        // With
+        TaskEntity taskEntity = createTaskEntity();
         when(taskRepository.fetchTaskByDescription(description)).thenReturn(null);
         when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
 
-        // Act
-        Long result = taskPersistenceService.createTask(taskEntity);
+        // When
+        Long taskIdReturned = taskPersistenceService.createTask(taskEntity);
 
         // Assert
-        assertEquals(taskId, result);
+        assertEquals(taskId, taskIdReturned);
         verify(taskRepository).fetchTaskByDescription(description);
         verify(taskRepository).save(taskEntity);
     }
 
     @Test
     void createTask_ShouldThrowException_WhenDescriptionNotUnique() {
-        // Arrange
+        // When
+        TaskEntity taskEntity = createTaskEntity();
         when(taskRepository.fetchTaskByDescription(description)).thenReturn(taskEntity);
 
-        // Act & Assert
+        // When & then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> taskPersistenceService.createTask(taskEntity));
         assertEquals("Description must be unique", exception.getMessage());
-        verify(taskRepository).fetchTaskByDescription(description);
-//        verify(taskRepository, never()).save(anyString(), anyInt(), anyInt(), anyInt(), any(Instant.class));
+        verify(taskRepository, never()).save(any(TaskEntity.class));
     }
 
     @Test
-    void updateTaskDescription_ShouldCallRepository() {
-        // Act
+    void updateTaskDescription_ShouldCheckUnique() {
+        // With
+        when(taskRepository.fetchTaskByDescription(description)).thenReturn(null);
+
+        // When
         taskPersistenceService.updateTaskDescription(taskId, description);
 
-        // Assert
+        // Then
+        verify(taskRepository).fetchTaskByDescription(description);
         verify(taskRepository).updateDescription(taskId, description);
     }
 
-    // TODO - won\t update task if description not unique
+    @Test
+    void updateTaskDescription_ShouldThrowException_WhenDescriptionNotUnique() {
+        // With
+        TaskEntity taskEntity = createTaskEntity();
+        when(taskRepository.fetchTaskByDescription(description)).thenReturn(taskEntity);
+
+        // When
+        taskPersistenceService.updateTaskDescription(taskId, description);
+        // When & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> taskPersistenceService.updateTaskDescription(taskId, description));
+        assertEquals("Description must be unique", exception.getMessage());
+        verify(taskRepository, never()).updateDescription(anyLong(), anyString());
+    }
 
     @Test
     void updateTaskScore_ShouldCallUpdateEffort_WhenEffort() {
-        // Act
-        taskPersistenceService.updateTaskScore(taskId, ScoreType.EFFORT, effort);
+        // When
+        taskPersistenceService.updateTaskScore(taskId, ScoreType.EFFORT, 5);
 
-        // Assert
-        verify(taskRepository).updateEffortScore(taskId, effort);
+        // Then
+        verify(taskRepository).updateEffortScore(taskId, 5);
         verify(taskRepository, never()).updateImpactScore(anyLong(), anyInt());
         verify(taskRepository, never()).updateUrgencyScore(anyLong(), anyInt());
     }
 
     @Test
     void updateTaskScore_ShouldCallUpdateImpact_WhenImpact() {
-        // Act
-        taskPersistenceService.updateTaskScore(taskId, ScoreType.IMPACT, impact);
+        // When
+        taskPersistenceService.updateTaskScore(taskId, ScoreType.IMPACT, 3);
 
-        // Assert
-        verify(taskRepository).updateImpactScore(taskId, impact);
+        // Then
+        verify(taskRepository).updateImpactScore(taskId, 3);
         verify(taskRepository, never()).updateEffortScore(anyLong(), anyInt());
         verify(taskRepository, never()).updateUrgencyScore(anyLong(), anyInt());
     }
 
     @Test
     void updateTaskScore_ShouldCallUpdateUrgency_WhenUrgency() {
-        // Act
-        taskPersistenceService.updateTaskScore(taskId, ScoreType.URGENCY, urgency);
+        // When
+        taskPersistenceService.updateTaskScore(taskId, ScoreType.URGENCY, 3);
 
-        // Assert
-        verify(taskRepository).updateUrgencyScore(taskId, urgency);
+        // Then
+        verify(taskRepository).updateUrgencyScore(taskId, 3);
         verify(taskRepository, never()).updateEffortScore(anyLong(), anyInt());
         verify(taskRepository, never()).updateImpactScore(anyLong(), anyInt());
     }
 
     @Test
     void updateTaskDeadline_ShouldCallRepository() {
-        // Act
-        taskPersistenceService.updateTaskDeadline(taskId, deadline);
+        // When
+        taskPersistenceService.updateTaskDeadline(taskId, Instant.now());
 
-        // Assert
-        verify(taskRepository).updateDeadline(taskId, deadline);
+        // Then
+        verify(taskRepository).updateDeadline(taskId, any(Instant.class));
     }
 
-    // TODO add miltuple entities
     @Test
     void getAllTasks_ShouldReturnList() {
-        // Arrange
-        List<TaskEntity> tasks = List.of(taskEntity);
+        // With
+        TaskEntity defaultTask = createTaskEntity();
+        TaskEntity secondTask = createTaskEntity(2L, "Second Task");
+        TaskEntity thirdTask = createTaskEntity(3L, "Third Task");
+        List<TaskEntity> tasks = List.of(defaultTask, secondTask, thirdTask);
         when(taskRepository.fetchAllTasks()).thenReturn(tasks);
 
-        // Act
+        // When
         List<TaskEntity> result = taskPersistenceService.getAllTasks();
 
-        // Assert
+        // Then
         assertEquals(tasks, result);
         verify(taskRepository).fetchAllTasks();
     }
 
     @Test
+    void getAllTasks_ShouldReturnEmptyList_WhenNoTasks() {
+        // With
+        when(taskRepository.fetchAllTasks()).thenReturn(List.of());
+
+        // When
+        List<TaskEntity> result = taskPersistenceService.getAllTasks();
+
+        // Then
+        assertTrue(result.isEmpty());
+        verify(taskRepository).fetchAllTasks();
+    }
+
+    @Test
     void getTask_ShouldReturnOptional_WhenTaskExists() {
-        // Arrange
+        // With
+        TaskEntity taskEntity = createTaskEntity();
         when(taskRepository.fetchTaskById(taskId)).thenReturn(taskEntity);
 
-        // Act
+        // When
         Optional<TaskEntity> result = taskPersistenceService.getTask(taskId);
 
-        // Assert
+        // Then
         assertTrue(result.isPresent());
         assertEquals(taskEntity, result.get());
         verify(taskRepository).fetchTaskById(taskId);
@@ -155,14 +176,23 @@ class TaskPersistenceServiceTest {
 
     @Test
     void getTask_ShouldReturnEmptyOptional_WhenTaskNotExists() {
-        // Arrange
+        // With
         when(taskRepository.fetchTaskById(taskId)).thenReturn(null);
 
-        // Act
+        // When
         Optional<TaskEntity> result = taskPersistenceService.getTask(taskId);
 
-        // Assert
+        // Then
         assertFalse(result.isPresent());
         verify(taskRepository).fetchTaskById(taskId);
+    }
+
+    // Class creator helper methods
+    private TaskEntity createTaskEntity(){
+        return createTaskEntity(taskId, description);
+    }
+
+    private TaskEntity createTaskEntity(Long taskId, String description){
+        return new TaskEntity(taskId, description, 3, 4, 6, Instant.now().plusSeconds(3600));
     }
 }

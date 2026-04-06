@@ -10,4 +10,5 @@ public enum ScoreType {
             case URGENCY -> new UrgencyScore(value);
         };
     }
+
 }

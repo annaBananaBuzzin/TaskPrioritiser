@@ -271,7 +271,6 @@ class TaskServiceTest {
     }
 
     // Class creator helper methods
-
     private TaskEntity createTask(Long taskId){
         return new TaskEntity(taskId, description, effortValue, impactValue, urgencyValue, deadline);
     }
@@ -297,6 +296,4 @@ class TaskServiceTest {
     private NewTask createNewTask(String description, int effortValue, int impactValue, int urgencyValue, Instant deadline){
         return new NewTask(description, new EffortScore(effortValue), new ImpactScore(impactValue), new UrgencyScore(urgencyValue), deadline);
     }
-
-
 }

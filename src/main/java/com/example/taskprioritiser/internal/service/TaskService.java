@@ -34,7 +34,7 @@ public class TaskService {
 
     public void updateTaskDescription(Long taskID, String description) {
         descriptionValidation(description);
-        // TODO - fetch task to ensure unique
+        // TODO - fetch task to ensure unique here or in persistence layer? Surely this is a business logic concern
         taskPersistenceService.updateTaskDescription(taskID, description);
     }
 
