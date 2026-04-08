@@ -8,7 +8,6 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class Task {
 
     // TODO - getter can throw null pointer exception if this is a new task without id
@@ -23,13 +22,15 @@ public class Task {
     // this can be null
     private Instant deadline;
 
-    // add get methods for each score value
-    //    public Map<ScoreType, Integer> getScoreValueMap() {
-    //        Map<ScoreType, Integer> scoreMap = new HashMap<>();
-    //        scoreMap.put(ScoreType.EFFORT, effortScore.getValue());
-    //        scoreMap.put(ScoreType.IMPACT, impactScore.getValue());
-    //        scoreMap.put(ScoreType.URGENCY, urgencyScore.getValue());
-    //        return scoreMap;
-    //    }
+    public Task(Long taskId, String description, Score effortScore, Score impactScore, Score urgencyScore, Instant deadline) {
+        this.taskId = taskId;
+        this.description = description;
+        this.effortScore = (EffortScore) effortScore;
+        this.impactScore = (ImpactScore) impactScore;
+        this.urgencyScore = (UrgencyScore) urgencyScore;
+        this.deadline = deadline;
+    }
+
+// add get methods for each score value
 
 }

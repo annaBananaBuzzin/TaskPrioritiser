@@ -19,7 +19,7 @@ public class ScorePersistenceService {
     @Transactional
     public void updateWeight(ScoreEntity scoreEntity) {
         validateWeight(scoreEntity.getWeight());
-        scoreRepository.updateScoreWeight(scoreEntity.getScore(), scoreEntity.getWeight());
+//        scoreRepository.updateScoreWeight(scoreEntity.getScore(), scoreEntity.getWeight());
     }
 
     @Transactional

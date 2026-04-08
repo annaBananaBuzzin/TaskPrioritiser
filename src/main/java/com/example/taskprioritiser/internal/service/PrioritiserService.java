@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 @Service
 public class PrioritiserService {
 
-    private final ZoneId zoneId;
+    private final ServiceConfig serviceConfig;
 
     private final TaskService taskService;
     private final PrioritiserConfig prioritiserConfig;
@@ -28,11 +28,14 @@ public class PrioritiserService {
     public PrioritiserService(TaskService taskService, PrioritiserConfig prioritiserConfig, ServiceConfig config) {
         this.taskService = taskService;
         this.prioritiserConfig = prioritiserConfig;
-        this.zoneId = config.getZoneId();
+        this.serviceConfig = config;
     }
 
     public List<Task> getPrioritisedTasks() {
         List<Task> tasks = taskService.getAllTasks();
+
+        // Don't like this
+        ZoneId zoneId = serviceConfig.getZoneId();
 
         LocalDate today = LocalDate.now(zoneId);
 
@@ -59,17 +62,16 @@ public class PrioritiserService {
                 .toList();
     }
 
-    private double calculatePriorityScore(Task task, boolean isToday) {
+    // allows specific testing - should this be in a separate class?
+    public double calculatePriorityScore(Task task, boolean isToday) {
         Map<ScoreType, Integer> scoreWeights = prioritiserConfig.getScoreWeightMap();
 
-        // Get priority equivalent scores
-        int effortWeightScore = task.getEffortScore().getValue() * scoreWeights.get(ScoreType.EFFORT);
         int impactWeightedScore = task.getImpactScore().getValue() * scoreWeights.get(ScoreType.IMPACT);
         int urgencyWeightedScore = task.getUrgencyScore().getValue() * scoreWeights.get(ScoreType.URGENCY);
 
         int benefitScore = impactWeightedScore + urgencyWeightedScore;
 
-        double reliefScore = calculateReliefScore(effortWeightScore, task.getDeadline(), isToday);
+        double reliefScore = calculateReliefScore(task.getEffortScore().getValue(), task.getDeadline(), isToday, scoreWeights.get(ScoreType.EFFORT));
 
         return benefitScore + reliefScore;
     }
@@ -80,13 +82,21 @@ public class PrioritiserService {
         return timeUnitCalculator.apply(duration);
     }
 
-    private double calculateReliefScore(int effortWeightScore, Instant deadline, boolean isToday) {
+    private double calculateReliefScore(int effortScore, Instant deadline, boolean isToday, int effortScoreWeight) {
         if (deadline == null) {
-            return prioritiserConfig.getScoreMaxValue() - effortWeightScore + 1;
+            return (prioritiserConfig.getScoreMaxValue() - effortScore + 1) * effortScoreWeight;
         }
+
+        // if today
+        // hour
+
+        // if negatve a if postive b
         // is this bad practise? to create a function here not just pass it through
         Function<Duration, Double> deadlineVariable = isToday ? this::getTimeDueVariable : this::getDateDueVariable;
-        return (double) effortWeightScore / getDeadlineVariable(deadline, deadlineVariable);
+        // y = a / x < for positive
+        // but foe negative i want y = a^x
+
+        return (double) (effortScore * effortScoreWeight) / getDeadlineVariable(deadline, deadlineVariable);
     }
 
     private double getTimeDueVariable(Duration duration) {
@@ -96,7 +106,8 @@ public class PrioritiserService {
 
     private double getDateDueVariable(Duration duration) {
         long days = duration.toDays();
-        return days < 0 ? days + prioritiserConfig.getDayDeadlineConstant() : days * -0.5;
+        // if due tomorrow will be 0 days so the deadline constant helps without offsets and impossible equations
+        return days < 0 ? days * -0.5 : days + prioritiserConfig.getDayDeadlineConstant();
     }
 
 }
