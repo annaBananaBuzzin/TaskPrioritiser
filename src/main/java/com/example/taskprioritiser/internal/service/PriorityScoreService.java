@@ -18,19 +18,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class PrioritiserService {
+public class PriorityScoreService {
+
+// priority scoring service
+// TaskPrioritisationService
 
     private final ServiceConfig serviceConfig;
 
     private final TaskService taskService;
     private final PrioritiserConfig prioritiserConfig;
 
-    public PrioritiserService(TaskService taskService, PrioritiserConfig prioritiserConfig, ServiceConfig config) {
+    public PriorityScoreService(TaskService taskService, PrioritiserConfig prioritiserConfig, ServiceConfig config) {
         this.taskService = taskService;
         this.prioritiserConfig = prioritiserConfig;
         this.serviceConfig = config;
     }
 
+// feel like this call should be in a separate service - these the sorting logic then theres the calculate priority score logic
     public List<Task> getPrioritisedTasks() {
         List<Task> tasks = taskService.getAllTasks();
 
@@ -44,6 +48,20 @@ public class PrioritiserService {
                 .collect(Collectors.partitioningBy(task ->
                         task.getDeadline().atZone(zoneId).toLocalDate().equals(today)));
 
+                        //Map<Boolean, List<Integer>> sortedMap = list.stream()
+        //    .collect(Collectors.partitioningBy(
+        //        predicate,
+        //        Collectors.collectingAndThen(Collectors.toList(), v -> {
+        //            v.sort(yourComparator);
+        //            return v;
+        //        })
+        //    ));
+
+        // we have a task
+        // we have a boolean isToday
+        // we have a priority score
+
+//List.of() / Collections.emptyList(): Returns truly immutable lists.
         // tasks are now prioritised
         partitionedTasksByToday.replaceAll((isToday, tasksSubList)->
                prioritiseTaskSubList(tasksSubList, isToday));

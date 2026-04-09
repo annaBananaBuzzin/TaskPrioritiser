@@ -2,10 +2,9 @@ package com.example.taskprioritiser.service;
 
 import com.example.taskprioritiser.PrioritiserConfig;
 import com.example.taskprioritiser.ServiceConfig;
-import com.example.taskprioritiser.internal.service.PrioritiserService;
+import com.example.taskprioritiser.internal.service.PriorityScoreService;
 import com.example.taskprioritiser.internal.service.TaskService;
 import com.example.taskprioritiser.internal.service.model.*;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,20 +12,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PrioritiserServiceTest {
+class PriorityScoreServiceTest {
 
     @Mock
     private TaskService taskService;
@@ -39,7 +36,7 @@ class PrioritiserServiceTest {
     private ServiceConfig serviceConfig;
 
     @InjectMocks
-    private PrioritiserService prioritiserService;
+    private PriorityScoreService priorityScoreService;
 
     // this is not good
     private final int effortValue = 5;
@@ -64,51 +61,61 @@ class PrioritiserServiceTest {
 
     @Test
     void getPrioritisedTasks_ShouldReturnTasksPrioritisedByScore() {
-        // Given
-        ZoneId zoneId = ZoneId.of("UTC");
-        when(serviceConfig.getZoneId()).thenReturn(zoneId);
+        // rogue other scores can happen
+    }
 
-        Map<ScoreType, Integer> weightMap = Map.of(
-                ScoreType.EFFORT, 3,
-                ScoreType.IMPACT, 2,
-                ScoreType.URGENCY, 3
-        );
-        when(prioritiserConfig.getScoreWeightMap()).thenReturn(weightMap);
-        when(prioritiserConfig.getScoreMaxValue()).thenReturn(10);
-        when(prioritiserConfig.getDayDeadlineConstant()).thenReturn(3);
-
-        Instant now = Instant.now();
-        Instant todayDeadline = now.plusSeconds(3600); // 1 hour from now
-        Instant futureDeadline = now.plusSeconds(86400 * 2); // 2 days from now
-        Instant pastDeadline = now.minusSeconds(3600); // 1 hour ago
-
-        Task task1 = new Task(1L, "Task 1", ScoreType.EFFORT.create(5), ScoreType.IMPACT.create(4), ScoreType.URGENCY.create(2), todayDeadline);
-        Task task2 = new Task(2L, "Task 2", ScoreType.EFFORT.create(3), ScoreType.IMPACT.create(5), ScoreType.URGENCY.create(5), futureDeadline);
-        Task task3 = new Task(3L, "Task 3", ScoreType.EFFORT.create(1), ScoreType.IMPACT.create(3), ScoreType.URGENCY.create(1), pastDeadline);
-        Task task4 = new Task(4L, "Task 4", ScoreType.EFFORT.create(4), ScoreType.IMPACT.create(2), ScoreType.URGENCY.create(3), null); // no deadline
-
-        List<Task> tasks = List.of(task1, task2, task3, task4);
+    @Test
+    void getPrioritisedTasks_ShouldReturnTasksPrioritisedByScore_WithNoneDueToday() {
+        //With these tasks
+        Task task1 = createTaskWithIdAndDeadline(1L, Instant.now().minus(1, ChronoUnit.DAYS)); // 44
+        Task task2 = createTaskWithIdAndDeadline(2L, Instant.now().minus(4, ChronoUnit.DAYS)); // 21.5
+        Task task3 = createTaskWithIdAndDeadline(3L, Instant.now().minus(7, ChronoUnit.DAYS)); // 18.29
+        Task task4 = createTaskWithIdAndDeadline(4L, Instant.now().plus(1, ChronoUnit.DAYS)); // 19
+        Task task5 = createTaskWithIdAndDeadline(5L, Instant.now().plus(4, ChronoUnit.DAYS)); // 16.5
+        Task task6 = createTaskWithIdAndDeadline(6L, Instant.now().plus(7, ChronoUnit.DAYS)); // 15.66
+        List<Task> tasks = List.of(task1, task2, task3, task4, task5, task6);
         when(taskService.getAllTasks()).thenReturn(tasks);
 
         // When
-        List<Task> prioritisedTasks = prioritiserService.getPrioritisedTasks();
+        List<Task> prioritisedTasks = priorityScoreService.getPrioritisedTasks();
 
         // Then
-        assertThat(prioritisedTasks).hasSize(4);
-        // Tasks due today should come first
-        assertThat(prioritisedTasks.get(0).getTaskId()).isEqualTo(1L); // task1 is due today
-        // Then other tasks sorted by score
-        // This is a basic check; more detailed assertions could be added for exact ordering
+        assertThat(prioritisedTasks).hasSize(6)
+                .extracting(Task::getTaskId)
+                .containsExactly(1L, 2L, 4L, 3L, 5L, 6L);
+    }
+
+    //test for the splitting of today
+    @Test
+    void getPrioritisedTasks_ShouldReturnTasksPrioritisedByDueTodayThenScore() {
+        //With these tasks
+        Task task1 = createTaskWithIdAndDeadline(1L, Instant.now().minus(1, ChronoUnit.HOURS)); // 29
+        Task task2 = createTaskWithIdAndDeadline(2L, Instant.now().minus(4, ChronoUnit.DAYS)); // 21.5
+        Task task3 = createTaskWithIdAndDeadline(3L, Instant.now().minus(7, ChronoUnit.DAYS)); // 18.29
+        // TODO how? 4 should be bigger than 5?
+        Task task4 = createTaskWithIdAndDeadline(4L, Instant.now().plus(2, ChronoUnit.HOURS)); // 19
+        Task task5 = createTaskWithIdAndDeadline(5L, Instant.now().plus(4, ChronoUnit.HOURS)); // 21.5
+        Task task6 = createTaskWithIdAndDeadline(6L, Instant.now().plus(7, ChronoUnit.DAYS)); // 15.66
+        List<Task> tasks = List.of(task1, task2, task3, task4, task5, task6);
+        when(taskService.getAllTasks()).thenReturn(tasks);
+
+        // When
+        List<Task> prioritisedTasks = priorityScoreService.getPrioritisedTasks();
+
+        // Then
+        assertThat(prioritisedTasks).hasSize(6)
+                .extracting(Task::getTaskId)
+                .containsExactly(1L, 5L, 4L, 2L, 3L, 6L);
     }
 
 
     @Test
     void calculatePriorityScore_ShouldReturnCorrectPriority_WithFutureDeadline() {
         //With
-        Task task = createDefaultTask();
+        Task task = TaskBuilder.create().build();
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, false);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, false);
 
         // int benefitScore = 4 * 2 + 2 * 3 = 14
         // TODO that's pretty small impact on overall score
@@ -125,7 +132,7 @@ class PrioritiserServiceTest {
         Task task = createTaskWithScores(ScoreType.EFFORT.create(10), ScoreType.IMPACT.create(impactValue), ScoreType.URGENCY.create(urgencyValue));
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, false);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, false);
 
         // int benefitScore = 14
         // int reliefScore = 10 * 3 / 6 + 3 = 3.333
@@ -141,7 +148,7 @@ class PrioritiserServiceTest {
         Task task = createTaskWithScores(ScoreType.EFFORT.create(effortValue), ScoreType.IMPACT.create(impactValue), ScoreType.URGENCY.create(10));
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, false);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, false);
 
         // int benefitScore = 4 * 2 + 10 * 3 = 38
         // int reliefScore = 5 * 3 / 6 + 3 = 1.666
@@ -158,10 +165,10 @@ class PrioritiserServiceTest {
     @Test
     void calculatePriorityScore_ShouldReturnCorrectPriority_WithNoDeadline() {
         //With
-        Task task = createDefaultTaskWithDeadline(null);
+        Task task = createTaskWithDeadline(null);
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, false);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, false);
 
         // int benefitScore =  14
         // int reliefScore = (10 - 5 + 1) * 3  =  18
@@ -174,10 +181,10 @@ class PrioritiserServiceTest {
     @Test
     void calculatePriorityScore_ShouldReturnCorrectPriority_WithPastDeadline() {
         //With
-        Task task = createDefaultTaskWithDeadline(Instant.now().minus(4, ChronoUnit.DAYS));
+        Task task = createTaskWithDeadline(Instant.now().minus(4, ChronoUnit.DAYS));
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, false);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, false);
 
         // int benefitScore =  14
         // int reliefScore = (5 * 3)/(-4 * -0.5) = 7.5
@@ -190,20 +197,20 @@ class PrioritiserServiceTest {
     @Test
     void calculatePriorityScore_ShouldBeInfluencedByPastDeadlineMoreThanFuture() {
         //With tasks becoming more overdue
-        Task oneDayOverDueTask = createDefaultTaskWithDeadline(Instant.now().minus(1, ChronoUnit.DAYS));
-        Task fourDaysOverDueTask = createDefaultTaskWithDeadline(Instant.now().minus(4, ChronoUnit.DAYS));
-        Task oneWeekOverDueTask = createDefaultTaskWithDeadline(Instant.now().minus(7, ChronoUnit.DAYS));
+        Task oneDayOverDueTask = createTaskWithDeadline(Instant.now().minus(1, ChronoUnit.DAYS));
+        Task fourDaysOverDueTask = createTaskWithDeadline(Instant.now().minus(4, ChronoUnit.DAYS));
+        Task oneWeekOverDueTask = createTaskWithDeadline(Instant.now().minus(7, ChronoUnit.DAYS));
 
         // When priority score calculated
         // Then should have non-linear decrease in priority score
         // (the longer a task is not completed after the deadline the less important the deadline is)
-        double oneDayOverDueTaskPriority = prioritiserService.calculatePriorityScore(oneDayOverDueTask, false);
+        double oneDayOverDueTaskPriority = priorityScoreService.calculatePriorityScore(oneDayOverDueTask, false);
         assertEquals(44, oneDayOverDueTaskPriority, 0.01);
 
-        double fourDaysOverDueTaskPriority = prioritiserService.calculatePriorityScore(fourDaysOverDueTask, false);
+        double fourDaysOverDueTaskPriority = priorityScoreService.calculatePriorityScore(fourDaysOverDueTask, false);
         assertEquals(21.5, fourDaysOverDueTaskPriority, 0.01);
 
-        double oneWeekOverDueTaskPriority = prioritiserService.calculatePriorityScore(oneWeekOverDueTask, false);
+        double oneWeekOverDueTaskPriority = priorityScoreService.calculatePriorityScore(oneWeekOverDueTask, false);
         assertEquals(18.29, oneWeekOverDueTaskPriority, 0.01);
 
         // hmm not exactly what was wanted ... the more over you are the quicker you should fall
@@ -215,32 +222,32 @@ class PrioritiserServiceTest {
         // not porpotional ... small numbers should stay smaller and big numers can do crazy
 
         //With tasks with deadlines moving further into the future
-        Task oneDayToDoTask = createDefaultTaskWithDeadline(Instant.now().plus(1, ChronoUnit.DAYS));
-        Task fourDaysToDoTask = createDefaultTaskWithDeadline(Instant.now().plus(4, ChronoUnit.DAYS));
-        Task oneWeekToDoTask = createDefaultTaskWithDeadline(Instant.now().plus(7, ChronoUnit.DAYS));
+        Task oneDayToDoTask = createTaskWithDeadline(Instant.now().plus(1, ChronoUnit.DAYS));
+        Task fourDaysToDoTask = createTaskWithDeadline(Instant.now().plus(4, ChronoUnit.DAYS));
+        Task oneWeekToDoTask = createTaskWithDeadline(Instant.now().plus(7, ChronoUnit.DAYS));
 
         // When priority score calculated
         // Then future deadlines should have a proportionate impact
-        double oneDayToDoTaskPriority = prioritiserService.calculatePriorityScore(oneDayToDoTask, false);
+        double oneDayToDoTaskPriority = priorityScoreService.calculatePriorityScore(oneDayToDoTask, false);
         assertEquals(19, oneDayToDoTaskPriority, 0.01);
 
-        double fourDaysToDoTaskPriority = prioritiserService.calculatePriorityScore(fourDaysToDoTask, false);
+        double fourDaysToDoTaskPriority = priorityScoreService.calculatePriorityScore(fourDaysToDoTask, false);
         assertEquals(16.5, fourDaysToDoTaskPriority, 0.01);
 
-        double oneWeekToDoTaskPriority = prioritiserService.calculatePriorityScore(oneWeekToDoTask, false);
+        double oneWeekToDoTaskPriority = priorityScoreService.calculatePriorityScore(oneWeekToDoTask, false);
         assertEquals(15.66, oneWeekToDoTaskPriority, 0.01);
 
-                // For a changes in increments of 3 the reductions are: 13% and 0.05%
+        // For a changes in increments of 3 the reductions are: 13% and 0.05%
 
     }
 
     @Test
     void calculatePriorityScore_ShouldReturnCorrectPriority_WithSameDayDeadline() {
         //With
-        Task task = createDefaultTaskWithDeadline(Instant.now().plus(2, ChronoUnit.HOURS));
+        Task task = createTaskWithDeadline(Instant.now().plus(2, ChronoUnit.HOURS));
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, true);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, true);
 
         // int benefitScore =  14
         // int reliefScore = (5 * 3)/1 + 1  = 7.5
@@ -253,10 +260,10 @@ class PrioritiserServiceTest {
     @Test
     void calculatePriorityScore_ShouldReturnCorrectPriority_WithSameDayOverdueDeadline() {
         //With
-        Task task = createDefaultTaskWithDeadline(Instant.now().minus(2, ChronoUnit.HOURS));
+        Task task = createTaskWithDeadline(Instant.now().minus(2, ChronoUnit.HOURS));
 
         // When
-        double priorityScore = prioritiserService.calculatePriorityScore(task, true);
+        double priorityScore = priorityScoreService.calculatePriorityScore(task, true);
 
         // int benefitScore =  14
         // int reliefScore = (5 * 3)/0 + 1  = 15
@@ -269,28 +276,29 @@ class PrioritiserServiceTest {
     @Test
     void calculatePriorityScore_ShouldReturnCorrectPriority_WithSamePriorityForOverdueTodayDeadline() {
         //With tasks becoming more overdue
-        Task oneHourOverDueTask = createDefaultTaskWithDeadline(Instant.now().minus(1, ChronoUnit.HOURS));
-        Task fourHourssOverDueTask = createDefaultTaskWithDeadline(Instant.now().minus(4, ChronoUnit.HOURS));
-        Task sevenHourssOverDueTask = createDefaultTaskWithDeadline(Instant.now().minus(7, ChronoUnit.HOURS));
+        Task oneHourOverDueTask = createTaskWithDeadline(Instant.now().minus(1, ChronoUnit.HOURS));
+        Task fourHourssOverDueTask = createTaskWithDeadline(Instant.now().minus(4, ChronoUnit.HOURS));
+        Task sevenHourssOverDueTask = createTaskWithDeadline(Instant.now().minus(7, ChronoUnit.HOURS));
 
         // When priority score calculated
         // Then overdue same day deadlines should have a proportionate impact
-        double oneHourOverdueTaskPriority = prioritiserService.calculatePriorityScore(oneHourOverDueTask, true);
+        double oneHourOverdueTaskPriority = priorityScoreService.calculatePriorityScore(oneHourOverDueTask, true);
         assertEquals(29, oneHourOverdueTaskPriority, 0.01);
 
-        double fourHoursOverdueTaskPriority = prioritiserService.calculatePriorityScore(fourHourssOverDueTask, true);
+        double fourHoursOverdueTaskPriority = priorityScoreService.calculatePriorityScore(fourHourssOverDueTask, true);
         assertEquals(29, fourHoursOverdueTaskPriority, 0.01);
 
-        double sevenHourOverdueTaskPriority = prioritiserService.calculatePriorityScore(sevenHourssOverDueTask, true);
+        double sevenHourOverdueTaskPriority = priorityScoreService.calculatePriorityScore(sevenHourssOverDueTask, true);
         assertEquals(29, sevenHourOverdueTaskPriority, 0.01);
     }
 
-    private Task createDefaultTask() {
-        return createTaskWithScores(ScoreType.EFFORT.create(effortValue), ScoreType.IMPACT.create(impactValue), ScoreType.URGENCY.create(urgencyValue));
+    // maybe one with id and deadline?
+    private Task createTaskWithDeadline(Instant deadline) {
+        return TaskBuilder.create().withDeadline(deadline).build();
     }
 
-    private Task createDefaultTaskWithDeadline(Instant deadline) {
-        return new Task(1L, "Task description", ScoreType.EFFORT.create(effortValue), ScoreType.IMPACT.create(impactValue), ScoreType.URGENCY.create(urgencyValue), deadline);
+    private Task createTaskWithIdAndDeadline(Long id, Instant deadline) {
+        return TaskBuilder.create().withTaskId(id).withDeadline(deadline).build();
     }
 
     private Task createTaskWithScores(Score effortScore, Score impactScore, Score urgencyScore) {
