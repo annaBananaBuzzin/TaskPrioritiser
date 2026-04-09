@@ -31,6 +31,17 @@ public class Task {
         this.deadline = deadline;
     }
 
-// add get methods for each score value
+// TODO implement these
+    public int getEffortScoreValue() {
+        return effortScore.getValue();
+    }
+
+    public int getImpactScoreValue() {
+        return impactScore.getValue();
+    }
+
+    public int getUrgencyScoreValue() {
+        return urgencyScore.getValue();
+    }
 
 }

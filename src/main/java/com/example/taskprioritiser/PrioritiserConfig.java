@@ -9,10 +9,9 @@ import java.util.Map;
 
 @ConfigurationProperties(prefix = "prioritiser")
 @ConfigurationPropertiesScan
-@Getter
 public class PrioritiserConfig {
 
-    private int dayDeadlineConstant;
-    private int scoreMaxValue;
-    private Map<ScoreType, Integer> scoreWeightMap;
+    public static int dayDeadlineConstant;
+    public static Map<ScoreType, Integer> scoreWeightMap;
+
 }

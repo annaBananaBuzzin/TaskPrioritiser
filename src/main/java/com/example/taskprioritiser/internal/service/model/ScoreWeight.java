@@ -6,8 +6,8 @@ import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
-// Domain model
-public class ScoreWeight {
+@Deprecated
+ public class ScoreWeight {
 
     int id;
     String scoreName;

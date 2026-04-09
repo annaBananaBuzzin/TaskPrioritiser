@@ -2,7 +2,7 @@ package com.example.taskprioritiser.internal.controller;
 
 import com.example.taskprioritiser.api.PrioritiserResource;
 import com.example.taskprioritiser.api.TaskResponse;
-import com.example.taskprioritiser.internal.service.PriorityScoreService;
+import com.example.taskprioritiser.internal.service.TaskPrioritisationService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -11,15 +11,15 @@ import java.util.List;
 public class PrioritiserController implements PrioritiserResource {
     // TODO intergration test only
 
-    private final PriorityScoreService priorityScoreService;
+    private final TaskPrioritisationService taskPrioritisationService;
 
-    public PrioritiserController(PriorityScoreService priorityScoreService) {
-        this.priorityScoreService = priorityScoreService;
+    public PrioritiserController(TaskPrioritisationService taskPrioritisationService) {
+        this.taskPrioritisationService = taskPrioritisationService;
     }
 
     @Override
     public List<TaskResponse> getAllTasksPrioritised() {
-        return priorityScoreService.getPrioritisedTasks().stream()
+        return taskPrioritisationService.getPrioritisedTasks().stream()
                 .map(ExternalTaskMapper::serviceToResponse).toList();
     }
 }

@@ -10,6 +10,7 @@ import java.time.ZoneId;
 @Configuration
 @ConfigurationPropertiesScan
 @Getter
+@Deprecated
 public class ServiceConfig {
 
     @Value("${app.service.timezone}")
