@@ -11,7 +11,9 @@ import java.util.Map;
 @ConfigurationPropertiesScan
 public class PrioritiserConfig {
 
+    @Getter
     public static int dayDeadlineConstant;
+    @Getter
     public static Map<ScoreType, Integer> scoreWeightMap;
 
 }

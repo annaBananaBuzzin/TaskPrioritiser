@@ -10,9 +10,7 @@ import java.time.ZoneId;
 
 public class DeadlineProperties {
 
-// TODO improve time zone handling
-
-// TODO TEST
+// TODO test
 
     @Getter
     private final boolean isToday;
@@ -35,14 +33,16 @@ public class DeadlineProperties {
 
     private double getDateDueVariable(Duration duration) {
         long days = duration.toDays();
+        int dayOffset = PrioritiserConfig.getDayDeadlineConstant();
         // if due tomorrow will be 0 days so the deadline constant helps without offsets and impossible equations
-        return days < 0 ? days * -0.5 : days + PrioritiserConfig.dayDeadlineConstant;
+        return days < 0 ? days * -0.5 : days + dayOffset;
     }
 
     private LocalDateTime instantToLocalDateTime(Instant instant) {
         if (instant == null) {
             throw new IllegalArgumentException("Instant cannot be null");
         }
+        // Improve time zone handling
         return instant.atZone(ZoneId.of("UTC")).toLocalDateTime();
     }
 

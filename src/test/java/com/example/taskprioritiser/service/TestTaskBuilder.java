@@ -17,7 +17,7 @@ public class TestTaskBuilder {
     private EffortScore effortScore = (EffortScore) ScoreType.EFFORT.create(5);
     private ImpactScore impactScore = (ImpactScore) ScoreType.IMPACT.create(4);
     private UrgencyScore urgencyScore = (UrgencyScore) ScoreType.URGENCY.create(2);
-    private Instant deadline = Instant.now().plus(7, ChronoUnit.DAYS);
+    private Instant deadline = Instant.now(TestHelper.fixedClock).plus(7, ChronoUnit.DAYS);
 
     public static TestTaskBuilder create() {
         return new TestTaskBuilder();

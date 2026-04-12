@@ -1,8 +1,5 @@
 package com.example.taskprioritiser.internal.service;
 
-import com.example.taskprioritiser.PrioritiserConfig;
-import com.example.taskprioritiser.ServiceConfig;
-import com.example.taskprioritiser.internal.service.model.ScoreType;
 import com.example.taskprioritiser.internal.service.model.Task;
 import com.example.taskprioritiser.internal.service.model.TaskPriority;
 import org.springframework.stereotype.Service;
@@ -30,6 +27,7 @@ public class TaskPrioritisationService {
 
         List<Task> tasks = taskService.getAllTasks();
 
+        // Improve time zone handling
         LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
 
         return tasks.stream()
@@ -50,5 +48,4 @@ public class TaskPrioritisationService {
                 .flatMap(entry -> entry.getValue().stream())
                 .toList();
     }
-
 }

@@ -12,7 +12,7 @@ public class PriorityScoringService {
 
     public TaskPriority getTaskPriority(Task task, LocalDateTime now) {
 
-        Map<ScoreType, Integer> scoreWeights = PrioritiserConfig.scoreWeightMap;
+        Map<ScoreType, Integer> scoreWeights = PrioritiserConfig.getScoreWeightMap();
 
         int benefitScore = calculateBenefitScore(task, scoreWeights);
 
