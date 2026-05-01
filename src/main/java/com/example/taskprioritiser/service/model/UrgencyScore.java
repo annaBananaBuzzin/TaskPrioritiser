@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.internal.service.model;
+package com.example.taskprioritiser.service.model;
 
 public class UrgencyScore extends Score{
 

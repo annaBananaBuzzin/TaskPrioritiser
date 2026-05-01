@@ -1,8 +1,8 @@
-package com.example.taskprioritiser.internal.service;
+package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.internal.service.repsoitory.TaskPersistenceService;
-import com.example.taskprioritiser.internal.service.mapper.EntityTaskMapper;
-import com.example.taskprioritiser.internal.service.model.*;
+import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
+import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
+import com.example.taskprioritiser.service.model.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -58,6 +58,7 @@ public class TaskService {
     public Task getTask(Long taskID) {
         return taskPersistenceService.getTask(taskID)
                 .map(EntityTaskMapper::toService)
+                // 404 not found
                 .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskID));
     }
 

@@ -1,10 +1,10 @@
-package com.example.taskprioritiser.internal.service.mapper;
+package com.example.taskprioritiser.service.mapper;
 
-import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity;
-import com.example.taskprioritiser.internal.service.model.EffortScore;
-import com.example.taskprioritiser.internal.service.model.ImpactScore;
-import com.example.taskprioritiser.internal.service.model.Task;
-import com.example.taskprioritiser.internal.service.model.UrgencyScore;
+import com.example.taskprioritiser.repsoitory.TaskEntity;
+import com.example.taskprioritiser.service.model.EffortScore;
+import com.example.taskprioritiser.service.model.ImpactScore;
+import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.model.UrgencyScore;
 
 public class EntityTaskMapper {
 

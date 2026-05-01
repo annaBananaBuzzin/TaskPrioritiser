@@ -1,6 +1,6 @@
-package com.example.taskprioritiser.internal.service.repsoitory.entity;
+package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.internal.service.model.ScoreType;
+import com.example.taskprioritiser.service.model.ScoreType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

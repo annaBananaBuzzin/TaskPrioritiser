@@ -1,9 +1,7 @@
 package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.internal.service.PriorityScoringService;
-import com.example.taskprioritiser.internal.service.TaskPrioritisationService;
-import com.example.taskprioritiser.internal.service.TaskService;
-import com.example.taskprioritiser.internal.service.model.*;
+import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.model.TaskPriority;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,6 +1,5 @@
-package com.example.taskprioritiser.internal.service.repsoitory;
+package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.internal.service.repsoitory.entity.ScoreEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

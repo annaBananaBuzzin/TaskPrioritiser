@@ -1,7 +1,6 @@
 package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.internal.service.model.Task;
-import com.example.taskprioritiser.internal.service.model.TaskPriority;
+import com.example.taskprioritiser.service.model.Task;
 import org.assertj.core.util.TriFunction;
 
 import java.time.Clock;

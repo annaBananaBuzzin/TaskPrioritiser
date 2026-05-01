@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.internal.controller;
+package com.example.taskprioritiser.api;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

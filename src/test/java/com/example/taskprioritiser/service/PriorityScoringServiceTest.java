@@ -1,10 +1,9 @@
 package com.example.taskprioritiser.service;
 
 import com.example.taskprioritiser.PrioritiserConfig;
-import com.example.taskprioritiser.internal.service.PriorityScoringService;
-import com.example.taskprioritiser.internal.service.model.ScoreType;
-import com.example.taskprioritiser.internal.service.model.Task;
-import com.example.taskprioritiser.internal.service.model.TaskPriority;
+import com.example.taskprioritiser.service.model.ScoreType;
+import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.model.TaskPriority;
 import org.assertj.core.util.TriFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;

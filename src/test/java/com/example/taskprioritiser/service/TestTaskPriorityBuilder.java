@@ -1,6 +1,6 @@
 package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.internal.service.model.TaskPriority;
+import com.example.taskprioritiser.service.model.TaskPriority;
 
 public class TestTaskPriorityBuilder {
 

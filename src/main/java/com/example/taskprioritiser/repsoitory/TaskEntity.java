@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.internal.service.repsoitory.entity;
+package com.example.taskprioritiser.repsoitory;
 
 import jakarta.persistence.*;
 import lombok.*;

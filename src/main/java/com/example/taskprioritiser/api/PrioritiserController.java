@@ -1,8 +1,6 @@
-package com.example.taskprioritiser.internal.controller;
+package com.example.taskprioritiser.api;
 
-import com.example.taskprioritiser.api.PrioritiserResource;
-import com.example.taskprioritiser.api.TaskResponse;
-import com.example.taskprioritiser.internal.service.TaskPrioritisationService;
+import com.example.taskprioritiser.service.TaskPrioritisationService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;

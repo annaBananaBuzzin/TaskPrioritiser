@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.internal.service.model;
+package com.example.taskprioritiser.service.model;
 
 public enum ScoreType {
     EFFORT, IMPACT, URGENCY;

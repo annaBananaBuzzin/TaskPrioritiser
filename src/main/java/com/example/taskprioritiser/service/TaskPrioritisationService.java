@@ -1,7 +1,7 @@
-package com.example.taskprioritiser.internal.service;
+package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.internal.service.model.Task;
-import com.example.taskprioritiser.internal.service.model.TaskPriority;
+import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.model.TaskPriority;
 import org.springframework.stereotype.Service;
 
 import java.time.*;

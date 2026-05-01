@@ -1,6 +1,5 @@
-package com.example.taskprioritiser.internal.service.repsoitory;
+package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

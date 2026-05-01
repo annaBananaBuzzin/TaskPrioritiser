@@ -1,8 +1,6 @@
-package com.example.taskprioritiser.internal.controller;
+package com.example.taskprioritiser.api;
 
-import com.example.taskprioritiser.api.TaskRequest;
-import com.example.taskprioritiser.api.TaskResponse;
-import com.example.taskprioritiser.internal.service.model.*;
+import com.example.taskprioritiser.service.model.*;
 
 // which packed should this be in to protect where the mapping can occur
 public class ExternalTaskMapper {

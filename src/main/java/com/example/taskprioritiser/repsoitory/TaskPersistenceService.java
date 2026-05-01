@@ -1,7 +1,6 @@
-package com.example.taskprioritiser.internal.service.repsoitory;
+package com.example.taskprioritiser.repsoitory;
 
-import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity;
-import com.example.taskprioritiser.internal.service.model.ScoreType;
+import com.example.taskprioritiser.service.model.ScoreType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

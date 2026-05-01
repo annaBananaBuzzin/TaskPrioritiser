@@ -1,6 +1,6 @@
-package com.example.taskprioritiser.internal.service.model;
+package com.example.taskprioritiser.service.model;
 
-import com.example.taskprioritiser.internal.service.repsoitory.entity.TaskEntity;
+import com.example.taskprioritiser.repsoitory.TaskEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

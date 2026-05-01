@@ -1,6 +1,6 @@
 package com.example.taskprioritiser;
 
-import com.example.taskprioritiser.internal.service.model.ScoreType;
+import com.example.taskprioritiser.service.model.ScoreType;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;

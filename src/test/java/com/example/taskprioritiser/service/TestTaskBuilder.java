@@ -1,10 +1,10 @@
 package com.example.taskprioritiser.service;
 
-import com.example.taskprioritiser.internal.service.model.EffortScore;
-import com.example.taskprioritiser.internal.service.model.ImpactScore;
-import com.example.taskprioritiser.internal.service.model.ScoreType;
-import com.example.taskprioritiser.internal.service.model.Task;
-import com.example.taskprioritiser.internal.service.model.UrgencyScore;
+import com.example.taskprioritiser.service.model.EffortScore;
+import com.example.taskprioritiser.service.model.ImpactScore;
+import com.example.taskprioritiser.service.model.ScoreType;
+import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.model.UrgencyScore;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
