@@ -1,7 +1,6 @@
 package com.example.taskprioritiser.api;
 
 import com.example.taskprioritiser.service.TestHelper;
-import com.example.taskprioritiser.service.model.ScoreType;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -11,7 +10,7 @@ public class TestTaskRequestBuilder {
     private String description = "Test Task Request";
     private int effortScore = 5;
     private int impactScore = 4;
-    private int urgencyScore = 2;
+    private int urgencyScore = 3;
     private Instant deadline = Instant.now(TestHelper.fixedClock).plus(7, ChronoUnit.DAYS);
 
     public static TestTaskRequestBuilder create() {

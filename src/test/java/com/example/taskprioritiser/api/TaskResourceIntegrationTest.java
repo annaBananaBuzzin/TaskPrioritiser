@@ -18,76 +18,77 @@ import java.time.temporal.ChronoUnit;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT) // or RANDOM_PORT
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 class TaskResourceIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-//
+
+// Still unsure why it isn't getting this bean
 //    @Autowired
 //    private JsonMapper objectMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
-            // TODO - prepopulate the table so know task ID
+    // TODO - prepopulate the table so know task ID
 
     @Test
     void createTask_ShouldReturnCreatedTaskWithId() throws Exception {
         // Given
-        TaskRequest request = new TaskRequest(
-                "Complete project report",
-                5,  // effort
-                4,  // impact
-                3,  // urgency
-                Instant.now().plus(7, ChronoUnit.DAYS)
-        );
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Complete project report")
+                .build();
 
-        // When
+        // When & Then
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.taskId").value(Matchers.greaterThan(0)))
-                .andExpect(jsonPath("$.description").value("Complete project report"))
-                .andExpect(jsonPath("$.description").value("Complete project report"))
-                .andExpect(jsonPath("$.effort").value("5"))
-                .andExpect(jsonPath("$.impact").value("4"))
-                .andExpect(jsonPath("$.urgency").value("3"))
-                .andExpect(jsonPath("$.deadline").value(Matchers.notNullValue()));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.taskId").value(Matchers.greaterThan(0)),
+                        jsonPath("$.description").value("Complete project report"),
+                        jsonPath("$.effort").value("5"),
+                        jsonPath("$.impact").value("4"),
+                        jsonPath("$.urgency").value("3"),
+                        jsonPath("$.deadline").value(Matchers.notNullValue()));
     }
 
     @Test
     void createTask_WithoutDeadline_ShouldReturnCreatedTask() throws Exception {
         // Given
-        TaskRequest request = new TaskRequest(
-                "Quick fix",
-                2,  // effort
-                3,  // impact
-                5,  // urgency
-                null  // no deadline
-        );
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Quick fix")
+                .withDeadline(null)
+                .build();
 
-        // When
+        // When & Then
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.taskId").value(Matchers.greaterThan(0)))
-                .andExpect(jsonPath("$.description").value("Quick fix"))
-                .andExpect(jsonPath("$.effort").value("2"))
-                .andExpect(jsonPath("$.impact").value("3"))
-                .andExpect(jsonPath("$.urgency").value("5"))
-                .andExpect(jsonPath("$.deadline").value(Matchers.nullValue()));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.taskId").value(Matchers.greaterThan(0)),
+                        jsonPath("$.description").value("Quick fix"),
+                        jsonPath("$.effort").value("5"),
+                        jsonPath("$.impact").value("4"),
+                        jsonPath("$.urgency").value("3"),
+                        jsonPath("$.deadline").value(Matchers.nullValue()));
     }
 
     @Test
     void getAllTasks_ShouldReturnListOfTasks() throws Exception {
-        // Given - Create multiple tasks first
-        TaskRequest task1 = new TaskRequest("Task 1", 5, 4, 3, Instant.now().plus(7, ChronoUnit.DAYS));
-        TaskRequest task2 = new TaskRequest("Task 2", 3, 3, 3, null);
+        // Given
+        TaskRequest task1 = TestTaskRequestBuilder.create()
+                .withDescription("Task 1")
+                .build();
+        TaskRequest task2 = TestTaskRequestBuilder.create()
+                .withDescription("Task 2")
+                .withDeadline(null)
+                .build();
 
+// When & Then
         mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task1)))
@@ -98,18 +99,22 @@ class TaskResourceIntegrationTest {
                         .content(objectMapper.writeValueAsString(task2)))
                 .andExpect(status().isOk());
 
-        // When
         mockMvc.perform(get("/task"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(2)))
-                .andExpect(jsonPath("$[0].description").value(Matchers.notNullValue()));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$").isArray(),
+                        jsonPath("$.length()").value(Matchers.greaterThanOrEqualTo(2)),
+                        jsonPath("$[0].description").value(Matchers.notNullValue()));
     }
 
     @Test
     void getTask_ShouldReturnTaskById() throws Exception {
-        // Given - Create a task first
-        TaskRequest request = new TaskRequest("Get this task", 5, 4, 3, Instant.now().plus(7, ChronoUnit.DAYS));
+        // Given
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Get this task")
+                .build();
+
+// When & Then
         MvcResult createResult = mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -119,17 +124,21 @@ class TaskResourceIntegrationTest {
         String jsonResponse = createResult.getResponse().getContentAsString();
         Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
 
-        // When
         mockMvc.perform(get("/task/{id}", taskId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.taskId").value(taskId))
-                .andExpect(jsonPath("$.description").value("Get this task"));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.taskId").value(taskId),
+                        jsonPath("$.description").value("Get this task"));
     }
 
     @Test
     void updateTask_ShouldUpdateDescription() throws Exception {
-        // Given - Create a task
-        TaskRequest request = new TaskRequest("Original description", 5, 4, 3, Instant.now().plus(7, ChronoUnit.DAYS));
+        // Given
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Original description")
+                .build();
+
+// When & Then
         MvcResult createResult = mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -139,23 +148,24 @@ class TaskResourceIntegrationTest {
         String jsonResponse = createResult.getResponse().getContentAsString();
         Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
 
-        // When
         UpdateDescriptionRequest updateDescriptionRequest = new UpdateDescriptionRequest("Updated description");
         mockMvc.perform(put("/task/{id}", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDescriptionRequest)))
                 .andExpect(status().isOk());
 
-        // Then
         mockMvc.perform(get("/task/{id}", taskId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value("Updated description"));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.description").value("Updated description"));
     }
 
     @Test
     void updateTask_ShouldUpdateDeadline() throws Exception {
-        // Given - Create a task
-        TaskRequest request = new TaskRequest("Task with deadline", 5, 4, 3, Instant.now().plus(7, ChronoUnit.DAYS));
+        // Given
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Task with deadline")
+                .build();
         MvcResult createResult = mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -165,7 +175,6 @@ class TaskResourceIntegrationTest {
         String jsonResponse = createResult.getResponse().getContentAsString();
         Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
 
-        // When - Update to a future deadline
         Instant futureDeadline = Instant.now().plus(14, ChronoUnit.DAYS);
         mockMvc.perform(put("/task/{id}/deadline", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -174,14 +183,17 @@ class TaskResourceIntegrationTest {
 
         // Then
         mockMvc.perform(get("/task/{id}", taskId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.deadline").value(Matchers.notNullValue()));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.deadline").value(Matchers.notNullValue()));
     }
 
     @Test
     void updateTask_WithPastDeadline_ShouldThrowException() throws Exception {
-        // Given - Create a task
-        TaskRequest request = new TaskRequest("Task with future deadline", 5, 4, 3, Instant.now().plus(7, ChronoUnit.DAYS));
+        // Given
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Task with future deadline")
+                .build();
         MvcResult createResult = mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -191,7 +203,6 @@ class TaskResourceIntegrationTest {
         String jsonResponse = createResult.getResponse().getContentAsString();
         Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
 
-        // When - Try to update to a past deadline
         Instant pastDeadline = Instant.now().minus(1, ChronoUnit.DAYS);
         mockMvc.perform(put("/task/{id}/deadline", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -201,8 +212,11 @@ class TaskResourceIntegrationTest {
 
     @Test
     void updateTask_ShouldUpdateScore() throws Exception {
-        // Given - Create a task
-        TaskRequest request = new TaskRequest("Task with scores", 3, 2, 2, Instant.now().plus(7, ChronoUnit.DAYS));
+        // Given
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Task with scores")
+                .withEffortScore(5)
+                .build();
         MvcResult createResult = mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -212,53 +226,62 @@ class TaskResourceIntegrationTest {
         String jsonResponse = createResult.getResponse().getContentAsString();
         Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
 
-        // When - Update effort score
         mockMvc.perform(put("/task/{id}/{score}/{value}", taskId, ScoreType.EFFORT, 8))
                 .andExpect(status().isOk());
 
-        // Then
         mockMvc.perform(get("/task/{id}", taskId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.effort").value("8"));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.effort").value("8"));
     }
 
     @Test
-    void fullWorkflow_ShouldCreateUpdateAndRetrieveTask() throws Exception {
-        // Given - Create a task
-        TaskRequest createRequest = new TaskRequest(
-                "Full workflow task",
-                5,  // effort
-                4,  // impact
-                3,  // urgency
-                Instant.now().plus(7, ChronoUnit.DAYS)
-        );
-
-        // When - Create
+    void updateTask_WithInvalidScore_ShouldThrowException() throws Exception {
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Task with other scores")
+                .withEffortScore(5)
+                .build();
         MvcResult createResult = mockMvc.perform(post("/task")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andReturn();
 
         String jsonResponse = createResult.getResponse().getContentAsString();
         Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
 
-        // Update description
+        mockMvc.perform(put("/task/{id}/{score}/{value}", taskId, ScoreType.IMPACT, 12))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void fullWorkflow_ShouldCreateUpdateAndRetrieveTask() throws Exception {
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Full workflow task")
+                .build();
+
+        MvcResult createResult = mockMvc.perform(post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = createResult.getResponse().getContentAsString();
+        Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
+
         UpdateDescriptionRequest updateDescriptionRequest = new UpdateDescriptionRequest("Updated workflow task");
         mockMvc.perform(put("/task/{id}", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDescriptionRequest)))
                 .andExpect(status().isOk());
 
-        // Update effort score
         mockMvc.perform(put("/task/{id}/{score}/{value}", taskId, ScoreType.EFFORT, 8))
                 .andExpect(status().isOk());
 
-        // Update impact score
         mockMvc.perform(put("/task/{id}/{score}/{value}", taskId, ScoreType.IMPACT, 7))
                 .andExpect(status().isOk());
 
-        // Update deadline
         Instant newDeadline = Instant.now().plus(14, ChronoUnit.DAYS);
         mockMvc.perform(put("/task/{id}/deadline", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -267,13 +290,14 @@ class TaskResourceIntegrationTest {
 
         // Then - Retrieve final state
         mockMvc.perform(get("/task/{id}", taskId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.taskId").value(taskId))
-                .andExpect(jsonPath("$.description").value("Updated workflow task"))
-                .andExpect(jsonPath("$.effort").value("8"))
-                .andExpect(jsonPath("$.impact").value("7"))
-                .andExpect(jsonPath("$.urgency").value("3"))
-                .andExpect(jsonPath("$.deadline").value(Matchers.notNullValue()));
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.taskId").value(taskId),
+                        jsonPath("$.description").value("Updated workflow task"),
+                        jsonPath("$.effort").value("8"),
+                        jsonPath("$.impact").value("7"),
+                        jsonPath("$.urgency").value("3"),
+                        jsonPath("$.deadline").value(Matchers.notNullValue()));
     }
-
 }
+
