@@ -127,6 +127,15 @@ class TaskPersistenceServiceTest {
     }
 
     @Test
+    void deleteTask_ShouldCallRepository() {
+        // When
+        taskPersistenceService.deleteTask(taskId);
+
+        // Then
+        verify(taskRepository).deleteById(taskId);
+    }
+
+    @Test
     void getAllTasks_ShouldReturnList() {
         // With
         TaskEntity defaultTask = createTaskEntity();

@@ -15,7 +15,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
     // TODO - improve table dynamics by creating a table for each score and connecting to task
     // TODO - whats the deal with value mapping and entities
 
-
     @Modifying
     @Query(value = "UPDATE task SET description = :description " +
             "WHERE task_id = :task_id", nativeQuery = true)

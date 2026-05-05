@@ -1,21 +1,27 @@
 package com.example.taskprioritiser.repsoitory;
 
 import com.example.taskprioritiser.service.model.ScoreType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Transactional
+//Test is running within one transaction so asserts aren't checking the updated DB
+// Running outside of transations to remove saftey net but ensure updates are pushed to DB
+// Not best practice
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 class TaskPersistenceServiceIntegrationTest {
 
     @Autowired
@@ -27,13 +33,18 @@ class TaskPersistenceServiceIntegrationTest {
     private String description1;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         description1 = "First Task";
         TaskEntity taskEntity1 = createTaskEntity(description1);
         TaskEntity taskEntity2 = createTaskEntity("Second Task");
 
         taskRepository.save(taskEntity1);
         taskRepository.save(taskEntity2);
+    }
+
+    @AfterEach
+    void tearDown(){
+        taskRepository.deleteAll();
     }
 
     @Test
@@ -59,7 +70,7 @@ class TaskPersistenceServiceIntegrationTest {
     }
 
     @Test
-    void updateTaskDescription_ShouldUpdateDatabase(){
+    void updateTaskDescription_ShouldUpdateDatabase() {
         TaskEntity taskEntity = taskRepository.fetchTaskByDescription(description1);
         Long taskId = taskEntity.getTaskId();
 
@@ -78,7 +89,7 @@ class TaskPersistenceServiceIntegrationTest {
     }
 
     @Test
-    void updateTaskDescription_ShouldThrowException_WhenDescriptionNotUnique(){
+    void updateTaskDescription_ShouldThrowException_WhenDescriptionNotUnique() {
         String newTaskDescription = "New Task";
         TaskEntity validTaskEntity = createTaskEntity(newTaskDescription);
         Long newTaskId = taskPersistenceService.createTask(validTaskEntity);
@@ -116,7 +127,7 @@ class TaskPersistenceServiceIntegrationTest {
     }
 
     @Test
-    void updateTaskDeadline_ShouldUpdateDatabase(){
+    void updateTaskDeadline_ShouldUpdateDatabase() {
         TaskEntity savedTaskEntity = taskRepository.fetchTaskByDescription(description1);
         Long savedTaskId = savedTaskEntity.getTaskId();
 
@@ -131,12 +142,45 @@ class TaskPersistenceServiceIntegrationTest {
     }
 
     @Test
+    void deleteTask_ShouldUpdateDatabase() {
+        TaskEntity savedTaskEntity = taskRepository.fetchTaskByDescription(description1);
+        Long savedTaskId = savedTaskEntity.getTaskId();
+
+        taskPersistenceService.deleteTask(savedTaskEntity.getTaskId());
+
+        Optional<TaskEntity> optionalTask = taskPersistenceService.getTask(savedTaskId);
+        assertThat(optionalTask).isEmpty();
+    }
+
+    @Test
+    void deleteTask_ShouldDoNothingWhenTaskIdNotPresent() {
+        List<TaskEntity> tasks = taskPersistenceService.getAllTasks();
+        Long randomId = getRandomIdExcluding(tasks.stream().map(TaskEntity::getTaskId).toList());
+
+        assertDoesNotThrow(() -> {
+            taskPersistenceService.deleteTask(randomId);
+        });
+
+    }
+
+    @Test
     void getAllTasks_ShouldReturnFromDatabase() {
         List<TaskEntity> tasks = taskPersistenceService.getAllTasks();
         assertEquals(2, tasks.size());
     }
 
-    private TaskEntity createTaskEntity(String description){
+    private TaskEntity createTaskEntity(String description) {
         return new TaskEntity(description, 3, 4, 6, Instant.now().plusSeconds(3600));
+    }
+
+    private Long getRandomIdExcluding(List<Long> excludedIds) {
+        Random random = new Random();
+        Long candidate;
+
+        do {
+            candidate = random.nextLong(1, Long.MAX_VALUE);
+        } while (excludedIds.contains(candidate));
+
+        return candidate;
     }
 }

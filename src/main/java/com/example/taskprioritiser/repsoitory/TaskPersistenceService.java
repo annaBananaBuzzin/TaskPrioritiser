@@ -13,7 +13,6 @@ import java.util.Optional;
 @Service
 public class TaskPersistenceService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TaskPersistenceService.class);
     private final TaskRepository taskRepository;
 
     public TaskPersistenceService(TaskRepository taskRepository) {
@@ -47,6 +46,12 @@ public class TaskPersistenceService {
     @Transactional
     public void updateTaskDeadline(Long taskID, Instant deadline) {
         taskRepository.updateDeadline(taskID, deadline);
+    }
+
+    @Transactional
+    public void deleteTask(Long taskID) {
+    // If task doesn't exist this is will be silent
+        taskRepository.deleteById(taskID);
     }
 
     @Transactional
