@@ -52,10 +52,10 @@ public class TaskController implements TaskResource {
         taskService.updateTaskScore(id, ExternalScoreTypeMapper.toService(score), value);
     }
 
-    // TODO add all score update endpoint
-
-    // TODO add delete endpoint
-
+    @Override
+    public void deleteTask(Long id) {
+        taskService.deleteTask(id);
+    }
 
     @Override
     public ErrorResponse handleNoSuchElementException(NoSuchElementException ex) {

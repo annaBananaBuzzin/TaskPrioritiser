@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -252,6 +253,42 @@ class TaskResourceIntegrationTest {
 
         mockMvc.perform(put("/task/{id}/{score}/{value}", taskId, ScoreType.IMPACT, 12))
                 .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void deleteTask_ShouldDeleteTask() throws Exception {
+        // Given
+        TaskRequest request = TestTaskRequestBuilder.create()
+                .withDescription("Task to be deleted")
+                .build();
+        MvcResult createResult = mockMvc.perform(post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = createResult.getResponse().getContentAsString();
+        Integer taskId = com.jayway.jsonpath.JsonPath.read(jsonResponse, "$.taskId");
+
+        mockMvc.perform(delete("/task/{id}", taskId))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/task/{id}", taskId)).andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    void deleteTask_WithNotFoundTaskId_ShouldDoNothing() throws Exception {
+        Random random = new Random();
+        Long idCandidate;
+
+        do {
+            idCandidate = random.nextLong(1, Long.MAX_VALUE);
+        } while (mockMvc.perform(get("/task/{id}", idCandidate)).andReturn().getResponse().getStatus() == 200);
+
+        mockMvc.perform(delete("/task/{id}", idCandidate))
+                .andExpect(status().isOk());
 
     }
 

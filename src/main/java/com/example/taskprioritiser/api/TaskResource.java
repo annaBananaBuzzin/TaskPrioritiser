@@ -32,6 +32,9 @@ public interface TaskResource {
     @PutMapping("/{id}/{score}/{value}")
     void updateTask(@PathVariable Long id, @PathVariable ScoreType score, @PathVariable int value);
 
+    @DeleteMapping("/{id}")
+    void deleteTask(@PathVariable Long id);
+
     @ExceptionHandler(value = NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ErrorResponse handleNoSuchElementException(NoSuchElementException ex);
