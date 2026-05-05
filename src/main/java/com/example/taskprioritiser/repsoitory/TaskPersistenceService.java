@@ -29,17 +29,10 @@ public class TaskPersistenceService {
 
     @Transactional
     public void updateTaskDescription(Long taskID, String description) {
-        logger.info("Before update - Getting task {}", taskID);
-        TaskEntity beforeUpdate = taskRepository.fetchTaskById(taskID);
-        logger.info("Before update - Description: {}", beforeUpdate.getDescription());
-
+        // will throw if updating to exact same description ... seems a bit unnecessary
         validateUniqueDescription(description);
-        logger.info("Calling repository updateDescription for task {} with new description: {}", taskID, description);
-        taskRepository.updateDescription(taskID, description);
 
-        logger.info("After update - Getting task {} to verify", taskID);
-        TaskEntity afterUpdate = taskRepository.fetchTaskById(taskID);
-        logger.info("After update - Description: {}", afterUpdate.getDescription());
+        taskRepository.updateDescription(taskID, description);
     }
 
     @Transactional

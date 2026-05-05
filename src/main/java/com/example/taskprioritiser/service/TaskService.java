@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class TaskService {
@@ -19,7 +20,6 @@ public class TaskService {
         this.taskPersistenceService = taskPersistenceService;
     }
 
-    // can throw illegal argument if description is not null
     public Task createTask(NewTask newTask) {
         // Validate inputs
         descriptionValidation(newTask.getDescription());
@@ -58,8 +58,7 @@ public class TaskService {
     public Task getTask(Long taskID) {
         return taskPersistenceService.getTask(taskID)
                 .map(EntityTaskMapper::toService)
-                // 404 not found
-                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskID));
+                .orElseThrow(() -> new NoSuchElementException("Task not found with ID: " + taskID));
     }
 
     private void descriptionValidation(String description) {
@@ -82,7 +81,7 @@ public class TaskService {
     }
 
     private void deadlineValidation(Instant deadline) {
-        if (deadline.isBefore(Instant.now())){
+        if (deadline != null && deadline.isBefore(Instant.now())){
             throw new IllegalArgumentException("Deadline must be in the future");
         }
     }

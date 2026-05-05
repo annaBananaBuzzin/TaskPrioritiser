@@ -2,12 +2,12 @@ package com.example.taskprioritiser.api;
 
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.TaskService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.List;
-
-// TODO intergration testing 
+import java.util.NoSuchElementException;
 
 @RestController
 public class TaskController implements TaskResource {
@@ -32,25 +32,18 @@ public class TaskController implements TaskResource {
     }
 
     @Override
-    //annotation for handling exception thrown
     public TaskResponse getTask(Long id) {
         return ExternalTaskMapper.serviceToResponse(taskService.getTask(id));
     }
 
     @Override
-    public void updateTask(Long id, String description) {
-        taskService.updateTaskDescription(id, description);
+    public void updateTask(Long id, UpdateDescriptionRequest newDescription) {
+        taskService.updateTaskDescription(id, newDescription.getNewDescription());
     }
 
     @Override
     public void updateTask(Long id, Instant taskDeadline) {
-        // Cannot update deadline to a past time
-        // swap the if statement around?
-        if(taskDeadline.isAfter(Instant.now())) {
-            taskService.updateTaskDeadline(id, taskDeadline);
-        } else {
-            throw new IllegalArgumentException("Deadline must be in the future");
-        }
+        taskService.updateTaskDeadline(id, taskDeadline);
     }
 
     @Override
@@ -62,4 +55,14 @@ public class TaskController implements TaskResource {
 
     // TODO add delete endpoint
 
+
+    @Override
+    public ErrorResponse handleNoSuchElementException(NoSuchElementException ex) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
+    @Override
+    public ErrorResponse handleIllegalArgumentException(IllegalArgumentException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
 }
