@@ -3,16 +3,19 @@ package com.example.taskprioritiser.service;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
 import com.example.taskprioritiser.service.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 public class TaskService {
 
     // TODO add logic for completeing tasks - would have a table of "outstanding tasks" fetched by a join
+    // Should probably check id exists before doing anything
 
     private final TaskPersistenceService taskPersistenceService;
 
@@ -23,7 +26,6 @@ public class TaskService {
     public Task createTask(NewTask newTask) {
         // Validate inputs
         descriptionValidation(newTask.getDescription());
-        validateScores(newTask.getEffortScore(), newTask.getImpactScore(), newTask.getUrgencyScore());
         deadlineValidation(newTask.getDeadline());
 
         // map to entity and persist
@@ -39,14 +41,24 @@ public class TaskService {
     }
 
     public void updateTaskScore(Long taskID, ScoreType scoreType, int value) {
+    // this now does the score value validation
         Score newScore = scoreType.create(value);
-        scoreValidation(newScore);
         taskPersistenceService.updateTaskScore(taskID, newScore.getType(), newScore.getValue());
     }
 
     public void updateTaskDeadline(Long taskID, Instant deadline) {
         deadlineValidation(deadline);
         taskPersistenceService.updateTaskDeadline(taskID, deadline);
+    }
+
+    public void deleteTask(Long taskID) {
+        try {
+            getTask(taskID);
+        } catch (Exception e) {
+            log.warn("Attempted to delete non-existent task with ID: {}", taskID);
+            return;
+        }
+        taskPersistenceService.deleteTask(taskID);
     }
 
     public List<Task> getAllTasks() {
@@ -67,21 +79,8 @@ public class TaskService {
         }
     }
 
-    private void validateScores(EffortScore effortScore, ImpactScore impactScore, UrgencyScore urgencyScore) {
-        scoreValidation(effortScore);
-        scoreValidation(impactScore);
-        scoreValidation(urgencyScore);
-    }
-
-    private void scoreValidation(Score score){
-        int value = score.getValue();
-        if (value < 1 || value > 10) {
-            throw new IllegalArgumentException(score.getType() + " score must be between 1 and 10");
-        }
-    }
-
     private void deadlineValidation(Instant deadline) {
-        if (deadline != null && deadline.isBefore(Instant.now())){
+        if (deadline != null && deadline.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Deadline must be in the future");
         }
     }

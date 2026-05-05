@@ -20,20 +20,21 @@ public class TaskController implements TaskResource {
 
     @Override
     public TaskResponse createTask(TaskRequest taskRequest) {
-        Task createdTask = taskService.createTask(ExternalTaskMapper.fromCreation(taskRequest));
-        return ExternalTaskMapper.serviceToResponse(createdTask);
+    // Add test that the POJO can't be created if scores aren't valid
+        Task createdTask = taskService.createTask(ServiceTaskMapper.fromCreationRequest(taskRequest));
+        return ServiceTaskMapper.ToResponse(createdTask);
     }
 
     @Override
     public List<TaskResponse> getAllTasks() {
         return taskService.getAllTasks().stream()
-                .map(ExternalTaskMapper::serviceToResponse)
+                .map(ServiceTaskMapper::ToResponse)
                 .toList();
     }
 
     @Override
     public TaskResponse getTask(Long id) {
-        return ExternalTaskMapper.serviceToResponse(taskService.getTask(id));
+        return ServiceTaskMapper.ToResponse(taskService.getTask(id));
     }
 
     @Override

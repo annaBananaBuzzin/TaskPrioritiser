@@ -18,6 +18,6 @@ public class PrioritiserController implements PrioritiserResource {
     @Override
     public List<TaskResponse> getAllTasksPrioritised() {
         return taskPrioritisationService.getPrioritisedTasks().stream()
-                .map(ExternalTaskMapper::serviceToResponse).toList();
+                .map(ServiceTaskMapper::ToResponse).toList();
     }
 }

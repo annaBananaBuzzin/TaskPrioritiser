@@ -14,7 +14,7 @@ public class Task {
     // just don't have a get method for id on entity.. but how to map to service? directly reference the field
     private final Long taskId;
     private String description;
-    // would this be a list o
+    // would this be a list
     private EffortScore effortScore;
     private ImpactScore impactScore;
     private UrgencyScore urgencyScore;
@@ -30,7 +30,6 @@ public class Task {
         this.deadline = deadline;
     }
 
-// TODO implement these
     public int getEffortScoreValue() {
         return effortScore.getValue();
     }

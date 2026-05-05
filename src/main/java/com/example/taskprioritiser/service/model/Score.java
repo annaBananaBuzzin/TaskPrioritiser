@@ -8,9 +8,8 @@ public abstract class Score {
     int value;
 
     public Score(ScoreType scoreType, int scoreValue) {
-        validateValue(scoreValue);
         this.type = scoreType;
-        this.value = scoreValue;
+        setValue(scoreValue);
     }
 
     public ScoreType getType() {
@@ -26,10 +25,12 @@ public abstract class Score {
         this.value = value;
     }
 
+    // should the validation of this score live here? It is fundamental to the Score class but is it a business logic concern instead?
     private void validateValue(int value) {
         if (value < 1 || value > 10) {
-            throw new IllegalArgumentException("Score value must be between 1 and 10");
+            throw new IllegalArgumentException(type + " score value must be between 1 and 10");
         }
+
     }
 
     public int calculateWeightedScore(Map<ScoreType, Integer> scoreWeights) {

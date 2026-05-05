@@ -66,44 +66,13 @@ class TaskServiceTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> taskService.createTask(newTask));
+                () -> taskService.createTask(newTask));
         assertEquals("Description cannot be null or empty", exception.getMessage());
 
-        verify(taskPersistenceService, never());
+        verifyNoInteractions(taskPersistenceService);
+
     }
 
-    // TODO should be able to cycle through the enum values
-
-    @ParameterizedTest
-    @ValueSource (ints = {-4, 0, 11})
-    void createTask_ShouldThrowException_WhenEffortScoreInvalid(int value) {
-        // When
-        NewTask newTask = createNewTaskWithScoreValues(value, impactValue, urgencyValue);
-
-        // Then
-        assertCreateTaskThrowsWithInvalidScoreValue(newTask, ScoreType.EFFORT);
-    }
-
-    @ParameterizedTest
-    @ValueSource (ints = {-4, 0, 11})
-    void createTask_ShouldThrowException_WhenImpactScoreInvalid(int value) {
-        // When
-        NewTask newTask = createNewTaskWithScoreValues(effortValue, value, urgencyValue);
-
-        // Then
-        assertCreateTaskThrowsWithInvalidScoreValue(newTask, ScoreType.IMPACT);
-    }
-
-
-    @ParameterizedTest
-    @ValueSource (ints = {-4, 0, 11})
-    void createTask_ShouldThrowException_WhenUrgencyScoreInvalid(int value) {
-        // When
-        NewTask newTask = createNewTaskWithScoreValues(effortValue, impactValue, value);
-
-        // Then
-        assertCreateTaskThrowsWithInvalidScoreValue(newTask, ScoreType.URGENCY);
-    }
 
     @Test
     void createTask_ShouldThrowException_WhenDeadlineInPast() {
@@ -115,10 +84,10 @@ class TaskServiceTest {
 
         // Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> taskService.createTask(newTask));
+                () -> taskService.createTask(newTask));
         assertEquals("Deadline must be in the future", exception.getMessage());
 
-        verify(taskPersistenceService, never());
+        verifyNoInteractions(taskPersistenceService);
     }
 
     @Test
@@ -126,10 +95,11 @@ class TaskServiceTest {
         // With
         when(taskPersistenceService.createTask(any())).thenReturn(taskId);
         when(taskPersistenceService.getTask(taskId)).thenReturn(Optional.empty());
+        NewTask newTask = createNewTask();
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-            () -> taskService.createTask(any()));
+                () -> taskService.createTask(newTask));
         assertEquals("Failed to retrieve the newly created task with ID: " + taskId, exception.getMessage());
     }
 
@@ -148,13 +118,13 @@ class TaskServiceTest {
     void updateTaskDescription_ShouldThrowException_WhenDescriptionInvalid(String description) {
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> taskService.updateTaskDescription(taskId, description));
+                () -> taskService.updateTaskDescription(taskId, description));
         assertEquals("Description cannot be null or empty", exception.getMessage());
         verify(taskPersistenceService, never()).updateTaskDescription(anyLong(), anyString());
     }
 
     @ParameterizedTest
-    @EnumSource (ScoreType.class)
+    @EnumSource(ScoreType.class)
     void updateTaskScore_WithScoreType_ShouldCallUpdateTaskScore(ScoreType scoreType) {
         // With
         int value = 7;
@@ -167,7 +137,7 @@ class TaskServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource (ints = {-4, 0, 11})
+    @ValueSource(ints = {-4, 0, 11})
     void updateTaskScore_ShouldThrowException_WhenScoreInvalid(int value) {
         Stream.of(ScoreType.values())
                 .forEach(type ->
@@ -190,9 +160,30 @@ class TaskServiceTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> taskService.updateTaskDeadline(taskId, pastDeadline));
+                () -> taskService.updateTaskDeadline(taskId, pastDeadline));
         assertEquals("Deadline must be in the future", exception.getMessage());
         verify(taskPersistenceService, never()).updateTaskDeadline(anyLong(), any(Instant.class));
+    }
+
+    @Test
+    void deleteTask_ShouldDeleteTask() {
+        // With
+        when(taskPersistenceService.getTask(taskId)).thenReturn(Optional.of(createTask(taskId)));
+
+        // When & Then
+        taskService.deleteTask(taskId);
+        verify(taskPersistenceService).getTask(eq(taskId));
+        verify(taskPersistenceService).deleteTask(eq(taskId));
+    }
+
+    @Test
+    void deleteTask_ShouldCatchException_WhenTaskDoesNotExist() {
+        // With
+        when(taskPersistenceService.getTask(taskId)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertDoesNotThrow(() -> taskService.deleteTask(taskId));
+        verify(taskPersistenceService, never()).deleteTask(anyLong());
     }
 
     @Test
@@ -249,50 +240,45 @@ class TaskServiceTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-            () -> taskService.getTask(taskId));
+                () -> taskService.getTask(taskId));
         assertEquals("Task not found with ID: " + taskId, exception.getMessage());
     }
 
-    void assertCreateTaskThrowsWithInvalidScoreValue(NewTask newTask, ScoreType scoreType){
+    void assertCreateTaskThrowsWithInvalidScoreValue(NewTask newTask, ScoreType scoreType) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> taskService.createTask(newTask));
-        assertEquals(scoreType + " score must be between 1 and 10", exception.getMessage());
+        assertEquals(scoreType + " score value must be between 1 and 10", exception.getMessage());
 
-        verify(taskPersistenceService, never());
+        verifyNoInteractions(taskPersistenceService);
     }
 
-    void assertUpdateTaskThrowsWithInvalidScoreValue(ScoreType scoreType, int value){
+    void assertUpdateTaskThrowsWithInvalidScoreValue(ScoreType scoreType, int value) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> taskService.updateTaskScore(taskId, scoreType, value));
-        assertEquals(scoreType + " score must be between 1 and 10", exception.getMessage());
+        assertEquals(scoreType + " score value must be between 1 and 10", exception.getMessage());
 
-        verify(taskPersistenceService, never());
+        verifyNoInteractions(taskPersistenceService);
+
     }
 
     // Class creator helper methods
-    private TaskEntity createTask(Long taskId){
+    private TaskEntity createTask(Long taskId) {
         return new TaskEntity(taskId, description, effortValue, impactValue, urgencyValue, deadline);
     }
 
-    private NewTask createNewTask(){
-        return createNewTask(description, effortValue, impactValue, urgencyValue);    }
-
-    private NewTask createNewTaskWithDescription(String description){
-        return createNewTask(description, effortValue, impactValue, urgencyValue);    }
-
-    private NewTask createNewTaskWithScoreValues(int effortValue, int impactValue, int urgencyValue){
-        return createNewTask(description, effortValue, impactValue, urgencyValue);
+    private NewTask createNewTask() {
+        return createNewTask(description, deadline);
     }
 
-    private NewTask createNewTaskWithDeadline(Instant deadline){
-        return createNewTask(description, effortValue, impactValue, urgencyValue, deadline);
+    private NewTask createNewTaskWithDescription(String description) {
+        return createNewTask(description, deadline);
     }
 
-    private NewTask createNewTask(String description, int effortValue, int impactValue, int urgencyValue){
-        return createNewTask(description, effortValue, impactValue, urgencyValue, deadline);
+    private NewTask createNewTaskWithDeadline(Instant deadline) {
+        return createNewTask(description, deadline);
     }
 
-    private NewTask createNewTask(String description, int effortValue, int impactValue, int urgencyValue, Instant deadline){
+    private NewTask createNewTask(String description, Instant deadline) {
         return new NewTask(description, new EffortScore(effortValue), new ImpactScore(impactValue), new UrgencyScore(urgencyValue), deadline);
     }
 }

@@ -157,9 +157,9 @@ class TaskPersistenceServiceIntegrationTest {
         List<TaskEntity> tasks = taskPersistenceService.getAllTasks();
         Long randomId = getRandomIdExcluding(tasks.stream().map(TaskEntity::getTaskId).toList());
 
-        assertDoesNotThrow(() -> {
-            taskPersistenceService.deleteTask(randomId);
-        });
+        assertDoesNotThrow(() ->
+            taskPersistenceService.deleteTask(randomId)
+        );
 
     }
 
