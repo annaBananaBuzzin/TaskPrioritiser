@@ -1,0 +1,1 @@
+DROP TABLE score_parameter;
