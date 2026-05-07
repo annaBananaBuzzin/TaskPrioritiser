@@ -1,5 +1,6 @@
 package com.example.taskprioritiser.api;
 
+import com.example.taskprioritiser.api.dto.TaskResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 

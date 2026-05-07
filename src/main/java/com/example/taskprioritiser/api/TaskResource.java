@@ -1,5 +1,9 @@
 package com.example.taskprioritiser.api;
 
+import com.example.taskprioritiser.api.dto.ScoreType;
+import com.example.taskprioritiser.api.dto.TaskRequest;
+import com.example.taskprioritiser.api.dto.TaskResponse;
+import com.example.taskprioritiser.api.dto.UpdateDescriptionRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

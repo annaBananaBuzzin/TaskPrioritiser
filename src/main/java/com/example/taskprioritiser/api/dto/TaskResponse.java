@@ -1,8 +1,7 @@
-package com.example.taskprioritiser.api;
+package com.example.taskprioritiser.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 

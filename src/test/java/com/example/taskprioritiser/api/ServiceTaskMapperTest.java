@@ -1,6 +1,6 @@
 package com.example.taskprioritiser.api;
 
-import com.example.taskprioritiser.service.model.*;
+import com.example.taskprioritiser.api.dto.TaskRequest;
 import com.example.taskprioritiser.service.model.ScoreType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

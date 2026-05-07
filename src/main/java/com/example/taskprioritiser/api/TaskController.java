@@ -1,7 +1,11 @@
 package com.example.taskprioritiser.api;
 
+import com.example.taskprioritiser.api.dto.ScoreType;
+import com.example.taskprioritiser.api.dto.TaskRequest;
+import com.example.taskprioritiser.api.dto.TaskResponse;
+import com.example.taskprioritiser.api.dto.UpdateDescriptionRequest;
 import com.example.taskprioritiser.service.model.Task;
-import com.example.taskprioritiser.service.TaskDetailService;
+import com.example.taskprioritiser.service.task.TaskDetailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,6 +13,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+
+// TODO move mapping to service layer
 @RestController
 public class TaskController implements TaskResource {
 

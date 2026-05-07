@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.prioritserFeature;
 
 import org.springframework.stereotype.Service;
 

@@ -3,6 +3,7 @@ package com.example.taskprioritiser.service;
 import com.example.taskprioritiser.repsoitory.TaskEntity;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.task.TasksManagementService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

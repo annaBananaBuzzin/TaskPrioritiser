@@ -1,5 +1,7 @@
 package com.example.taskprioritiser.api;
 
+import com.example.taskprioritiser.api.dto.TaskRequest;
+import com.example.taskprioritiser.api.dto.TaskResponse;
 import com.example.taskprioritiser.service.model.*;
 
 public class ServiceTaskMapper {

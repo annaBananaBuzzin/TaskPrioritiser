@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.task;
 
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;

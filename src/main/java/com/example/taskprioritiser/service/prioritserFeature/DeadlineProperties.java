@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.prioritserFeature;
 
 import com.example.taskprioritiser.PrioritiserConfig;
 import lombok.Getter;

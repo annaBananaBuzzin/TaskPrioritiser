@@ -8,6 +8,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
+@Deprecated
 public class TaskScoreValue {
 
     @NotBlank(message = "Score name is required")

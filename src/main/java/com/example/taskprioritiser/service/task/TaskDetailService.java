@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.task;
 
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j

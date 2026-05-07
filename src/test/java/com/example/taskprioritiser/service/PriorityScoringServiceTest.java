@@ -5,6 +5,7 @@ import com.example.taskprioritiser.TestHelper;
 import com.example.taskprioritiser.service.model.ScoreType;
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.model.TaskPriority;
+import com.example.taskprioritiser.service.prioritserFeature.PriorityScoringService;
 import org.assertj.core.util.TriFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;

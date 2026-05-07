@@ -1,5 +1,7 @@
 package com.example.taskprioritiser.api;
 
+import com.example.taskprioritiser.api.dto.ScoreType;
+
 //protected?
 public class ExternalScoreTypeMapper {
 
