@@ -11,22 +11,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class TaskPrioritisationService {
+public class PrioritiseTasksService {
 
 // TODO improve time zone handling
 
-    private final TaskService taskService;
     private final PriorityScoringService priorityScoringService;
 
-    public TaskPrioritisationService(TaskService taskService, PriorityScoringService priorityScoringService) {
-        this.taskService = taskService;
+    public PrioritiseTasksService(PriorityScoringService priorityScoringService) {
         this.priorityScoringService = priorityScoringService;
     }
 
-    public List<Task> getPrioritisedTasks() {
-
-        List<Task> tasks = taskService.getAllTasks();
-
+    public List<Task> prioritiseTasks(List<Task> tasks) {
         // Improve time zone handling
         LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
 
@@ -48,4 +43,5 @@ public class TaskPrioritisationService {
                 .flatMap(entry -> entry.getValue().stream())
                 .toList();
     }
+
 }

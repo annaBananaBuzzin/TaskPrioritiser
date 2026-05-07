@@ -14,23 +14,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TaskServiceTest {
+class TaskDetailServiceTest {
 
     @Mock
     private TaskPersistenceService taskPersistenceService;
 
     @InjectMocks
-    private TaskService taskService;
+    private TaskDetailService taskDetailService;
 
     private final Long taskId = 1L;
     private final String description = "First Task";
@@ -47,7 +45,7 @@ class TaskServiceTest {
         NewTask newTask = createNewTask();
 
         // When
-        Task result = taskService.createTask(newTask);
+        Task result = taskDetailService.createTask(newTask);
 
         // Then
         assertNotNull(result);
@@ -66,7 +64,7 @@ class TaskServiceTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> taskService.createTask(newTask));
+                () -> taskDetailService.createTask(newTask));
         assertEquals("Description cannot be null or empty", exception.getMessage());
 
         verifyNoInteractions(taskPersistenceService);
@@ -84,7 +82,7 @@ class TaskServiceTest {
 
         // Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> taskService.createTask(newTask));
+                () -> taskDetailService.createTask(newTask));
         assertEquals("Deadline must be in the future", exception.getMessage());
 
         verifyNoInteractions(taskPersistenceService);
@@ -99,7 +97,7 @@ class TaskServiceTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> taskService.createTask(newTask));
+                () -> taskDetailService.createTask(newTask));
         assertEquals("Failed to retrieve the newly created task with ID: " + taskId, exception.getMessage());
     }
 
@@ -107,7 +105,7 @@ class TaskServiceTest {
     void updateTaskDescription_ShouldCallPersistenceService_WhenValid() {
         // When
         String newDescription = "Updated Description";
-        taskService.updateTaskDescription(taskId, newDescription);
+        taskDetailService.updateTaskDescription(taskId, newDescription);
 
         // Then
         verify(taskPersistenceService).updateTaskDescription(taskId, newDescription);
@@ -118,7 +116,7 @@ class TaskServiceTest {
     void updateTaskDescription_ShouldThrowException_WhenDescriptionInvalid(String description) {
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> taskService.updateTaskDescription(taskId, description));
+                () -> taskDetailService.updateTaskDescription(taskId, description));
         assertEquals("Description cannot be null or empty", exception.getMessage());
         verify(taskPersistenceService, never()).updateTaskDescription(anyLong(), anyString());
     }
@@ -130,7 +128,7 @@ class TaskServiceTest {
         int value = 7;
 
         // When
-        taskService.updateTaskScore(taskId, scoreType, value);
+        taskDetailService.updateTaskScore(taskId, scoreType, value);
 
         // Then
         verify(taskPersistenceService).updateTaskScore(eq(taskId), eq(scoreType), eq(value));
@@ -147,7 +145,7 @@ class TaskServiceTest {
     @Test
     void updateTaskDeadline_ShouldCallPersistenceService_WhenValid() {
         // When
-        taskService.updateTaskDeadline(taskId, deadline);
+        taskDetailService.updateTaskDeadline(taskId, deadline);
 
         // Then
         verify(taskPersistenceService).updateTaskDeadline(taskId, deadline);
@@ -160,7 +158,7 @@ class TaskServiceTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> taskService.updateTaskDeadline(taskId, pastDeadline));
+                () -> taskDetailService.updateTaskDeadline(taskId, pastDeadline));
         assertEquals("Deadline must be in the future", exception.getMessage());
         verify(taskPersistenceService, never()).updateTaskDeadline(anyLong(), any(Instant.class));
     }
@@ -171,7 +169,7 @@ class TaskServiceTest {
         when(taskPersistenceService.getTask(taskId)).thenReturn(Optional.of(createTask(taskId)));
 
         // When & Then
-        taskService.deleteTask(taskId);
+        taskDetailService.deleteTask(taskId);
         verify(taskPersistenceService).getTask(eq(taskId));
         verify(taskPersistenceService).deleteTask(eq(taskId));
     }
@@ -182,41 +180,8 @@ class TaskServiceTest {
         when(taskPersistenceService.getTask(taskId)).thenReturn(Optional.empty());
 
         // When & Then
-        assertDoesNotThrow(() -> taskService.deleteTask(taskId));
+        assertDoesNotThrow(() -> taskDetailService.deleteTask(taskId));
         verify(taskPersistenceService, never()).deleteTask(anyLong());
-    }
-
-    @Test
-    void getAllTasks_ShouldReturnListOfTasks() {
-        // With
-        TaskEntity entity1 = createTask(taskId);
-        TaskEntity entity2 = createTask(2L);
-        TaskEntity entity3 = createTask(3L);
-        TaskEntity entity4 = createTask(4L);
-        List<TaskEntity> entities = List.of(entity1, entity2, entity3, entity4);
-        when(taskPersistenceService.getAllTasks()).thenReturn(entities);
-
-        // When
-        List<Task> result = taskService.getAllTasks();
-
-        // Then
-        assertThat(result).hasSize(4)
-                .extracting(Task::getTaskId)
-                .containsAll(List.of(taskId, 2L, 3L, 4L));
-        verify(taskPersistenceService).getAllTasks();
-    }
-
-    @Test
-    void getAllTasks_ShouldReturnEmptyList_WhenNoTasks() {
-        // With
-        when(taskPersistenceService.getAllTasks()).thenReturn(List.of());
-
-        // When
-        List<Task> result = taskService.getAllTasks();
-
-        // Then
-        assertTrue(result.isEmpty());
-        verify(taskPersistenceService).getAllTasks();
     }
 
     @Test
@@ -225,7 +190,7 @@ class TaskServiceTest {
         when(taskPersistenceService.getTask(taskId)).thenReturn(Optional.of(createTask(taskId)));
 
         // When
-        Task result = taskService.getTask(taskId);
+        Task result = taskDetailService.getTask(taskId);
 
         // Then
         assertNotNull(result);
@@ -240,13 +205,13 @@ class TaskServiceTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> taskService.getTask(taskId));
+                () -> taskDetailService.getTask(taskId));
         assertEquals("Task not found with ID: " + taskId, exception.getMessage());
     }
 
     void assertCreateTaskThrowsWithInvalidScoreValue(NewTask newTask, ScoreType scoreType) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> taskService.createTask(newTask));
+                () -> taskDetailService.createTask(newTask));
         assertEquals(scoreType + " score value must be between 1 and 10", exception.getMessage());
 
         verifyNoInteractions(taskPersistenceService);
@@ -254,7 +219,7 @@ class TaskServiceTest {
 
     void assertUpdateTaskThrowsWithInvalidScoreValue(ScoreType scoreType, int value) {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> taskService.updateTaskScore(taskId, scoreType, value));
+                () -> taskDetailService.updateTaskScore(taskId, scoreType, value));
         assertEquals(scoreType + " score value must be between 1 and 10", exception.getMessage());
 
         verifyNoInteractions(taskPersistenceService);

@@ -12,14 +12,14 @@ import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
-public class TaskService {
+public class TaskDetailService {
 
     // TODO add logic for completeing tasks - would have a table of "outstanding tasks" fetched by a join
     // Should probably check id exists before doing anything
 
     private final TaskPersistenceService taskPersistenceService;
 
-    public TaskService(TaskPersistenceService taskPersistenceService) {
+    public TaskDetailService(TaskPersistenceService taskPersistenceService) {
         this.taskPersistenceService = taskPersistenceService;
     }
 
@@ -59,12 +59,6 @@ public class TaskService {
             return;
         }
         taskPersistenceService.deleteTask(taskID);
-    }
-
-    public List<Task> getAllTasks() {
-        return taskPersistenceService.getAllTasks().stream()
-                .map(EntityTaskMapper::toService)
-                .toList();
     }
 
     public Task getTask(Long taskID) {
