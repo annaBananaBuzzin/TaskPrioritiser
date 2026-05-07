@@ -1,5 +1,6 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser;
 
+import com.example.taskprioritiser.service.TestTaskBuilder;
 import com.example.taskprioritiser.service.model.Task;
 import org.assertj.core.util.TriFunction;
 
@@ -8,10 +9,12 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
+import java.util.Random;
 
 public class TestHelper {
 
 // This is supposed to be set as the .now() in the application when running tests
+// Should be injecting clock in service and then mocking
     public static Clock fixedClock = Clock.fixed(Instant.parse("2222-06-01T13:00:00Z"), ZoneOffset.UTC);
 
     public static Instant createTime(
@@ -30,4 +33,14 @@ public class TestHelper {
         );
     }
 
+    public static Long getRandomIdExcluding(List<Long> excludedIds) {
+        Random random = new Random();
+        Long candidate;
+
+        do {
+            candidate = random.nextLong(1, Long.MAX_VALUE);
+        } while (excludedIds.contains(candidate));
+
+        return candidate;
+    }
 }

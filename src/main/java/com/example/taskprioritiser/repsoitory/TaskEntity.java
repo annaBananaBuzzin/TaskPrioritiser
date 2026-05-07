@@ -14,7 +14,6 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Entity
 @Table(name="task")
-// could be record but id is set after creation
 public class TaskEntity {
 
     @Id

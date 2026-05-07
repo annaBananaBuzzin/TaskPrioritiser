@@ -1,6 +1,6 @@
 package com.example.taskprioritiser.api;
 
-import com.example.taskprioritiser.service.TestHelper;
+import com.example.taskprioritiser.TestHelper;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

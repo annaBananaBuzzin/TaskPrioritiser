@@ -7,6 +7,7 @@ import java.time.Instant;
 
 @Getter
 @Setter
+// Could be record
 public class Task {
 
     // TODO - getter can throw null pointer exception if this is a new task without id

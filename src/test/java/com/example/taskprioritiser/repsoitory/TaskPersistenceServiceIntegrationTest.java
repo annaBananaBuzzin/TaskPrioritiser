@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import static com.example.taskprioritiser.TestHelper.getRandomIdExcluding;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -173,14 +174,4 @@ class TaskPersistenceServiceIntegrationTest {
         return new TaskEntity(description, 3, 4, 6, Instant.now().plusSeconds(3600));
     }
 
-    private Long getRandomIdExcluding(List<Long> excludedIds) {
-        Random random = new Random();
-        Long candidate;
-
-        do {
-            candidate = random.nextLong(1, Long.MAX_VALUE);
-        } while (excludedIds.contains(candidate));
-
-        return candidate;
-    }
 }
