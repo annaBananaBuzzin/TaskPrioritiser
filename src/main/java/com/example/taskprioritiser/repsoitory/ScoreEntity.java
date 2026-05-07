@@ -18,6 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name="score_parameter")
+@Deprecated
 public class ScoreEntity {
 
     @Id

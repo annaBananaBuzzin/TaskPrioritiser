@@ -15,34 +15,38 @@ public class DoneTaskPersistenceService {
     public DoneTaskPersistenceService(DoneTaskRepository doneTaskRepository) {
         this.doneTaskRepository = doneTaskRepository;
     }
-
+    // Service layer to handle if invalid taskID
     @Transactional
     public void saveDoneTask(Long taskID) {
-        doneTaskRepository.saveDoneTask(taskID, Instant.now());
+            DoneTaskEntity doneTaskEntity=  new DoneTaskEntity(taskID, Instant.now());
+
+        doneTaskRepository.save(doneTaskEntity);
     }
 
+    // Service layer to handle if invalid taskID
     @Transactional
     public boolean isTaskDone(Long taskID) {
         return doneTaskRepository.isTaskDone(taskID);
     }
 
+    // Service layer to handle if invalid taskID
     @Transactional
     public void deleteDoneTask(Long taskID) {
         doneTaskRepository.deleteByTaskId(taskID);
     }
 
     @Transactional
-    public Optional<DoneTaskEntity> fetchDoneTaskByTaskId(Long taskID) {
+    public Optional<DoneTaskProjection> fetchDoneTaskByTaskId(Long taskID) {
         return Optional.ofNullable(doneTaskRepository.fetchDoneTaskByTaskId(taskID));
     }
 
     @Transactional
-    public Optional<DoneTaskEntity> fetchDoneTaskByDescription(String description) {
+    public Optional<DoneTaskProjection> fetchDoneTaskByDescription(String description) {
         return Optional.ofNullable(doneTaskRepository.fetchDoneTaskByTaskDescription(description));
     }
 
     @Transactional
-    public List<DoneTaskEntity> fetchAllDoneTasks() {
+    public List<DoneTaskProjection> fetchAllDoneTasks() {
         return doneTaskRepository.fetchAllDoneTasks();
     }
 

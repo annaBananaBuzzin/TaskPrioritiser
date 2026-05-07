@@ -47,7 +47,7 @@ class DoneTaskPersistenceServiceIntegrationTest {
     void saveDoneTask() {
         underTest.saveDoneTask(task1Id);
 
-        DoneTaskEntity doneTask = doneTaskRepository.fetchDoneTaskByTaskId(task1Id);
+        DoneTaskProjection doneTask = doneTaskRepository.fetchDoneTaskByTaskId(task1Id);
         assertNotNull(doneTask);
         assertEquals(task1Id, doneTask.getTaskId());
         assertEquals("First Task", doneTask.getDescription());
@@ -55,9 +55,9 @@ class DoneTaskPersistenceServiceIntegrationTest {
     }
 
     @Test
-    void saveDoneTask_withNonExistingTaskID_ShouldThrow() {
+    void saveDoneTask_withNonExistingTaskID_ShouldNotThrow() {
         Long nonExistingTaskId = getRandomIdExcluding(List.of(task1Id, task2Id));
-        assertThrows(IllegalArgumentException.class, () -> underTest.saveDoneTask(nonExistingTaskId));
+        assertDoesNotThrow(() -> underTest.saveDoneTask(nonExistingTaskId));
     }
 
 
@@ -69,9 +69,9 @@ class DoneTaskPersistenceServiceIntegrationTest {
     }
 
     @Test
-    void isTaskDone_withNonExistingTaskID_ShouldThrow() {
+    void isTaskDone_withNonExistingTaskID_ShouldNotThrow() {
         Long nonExistingTaskId = getRandomIdExcluding(List.of(task1Id, task2Id));
-        assertThrows(IllegalArgumentException.class, () -> underTest.isTaskDone(nonExistingTaskId));
+        assertDoesNotThrow(() -> underTest.isTaskDone(nonExistingTaskId));
     }
 
     @Test
@@ -82,9 +82,9 @@ class DoneTaskPersistenceServiceIntegrationTest {
     }
 
     @Test
-    void deleteDoneTask_withNonExistingTaskID_ShouldThrow() {
+    void deleteDoneTask_withNonExistingTaskID_ShouldNotThrow() {
         Long nonExistingTaskId = getRandomIdExcluding(List.of(task1Id, task2Id));
-        assertThrows(IllegalArgumentException.class, () -> underTest.deleteDoneTask(nonExistingTaskId));
+        assertDoesNotThrow(() -> underTest.deleteDoneTask(nonExistingTaskId));
     }
 
     @Test
@@ -115,9 +115,9 @@ class DoneTaskPersistenceServiceIntegrationTest {
         underTest.saveDoneTask(task1Id);
         Long task3Id = createTask("Third Task");
 
-        List<DoneTaskEntity> doneTasks = underTest.fetchAllDoneTasks();
+        List<DoneTaskProjection> doneTasks = underTest.fetchAllDoneTasks();
         assertThat(doneTasks).hasSize(2);
-        assertThat(doneTasks).extracting(DoneTaskEntity::getTaskId)
+        assertThat(doneTasks).extracting(DoneTaskProjection::getTaskId)
                 .doesNotContain(task3Id);
     }
 
@@ -126,9 +126,9 @@ class DoneTaskPersistenceServiceIntegrationTest {
         underTest.saveDoneTask(task1Id);
         Long task3Id = createTask("Third Task");
 
-        List<DoneTaskEntity> doneTasks = underTest.fetchAllDoneTasks();
+        List<TaskEntity> doneTasks = underTest.fetchAllNotDoneTasks();
         assertThat(doneTasks).hasSize(2);
-        assertThat(doneTasks).extracting(DoneTaskEntity::getTaskId)
+        assertThat(doneTasks).extracting(TaskEntity::getTaskId)
                 .containsExactlyInAnyOrder(task2Id, task3Id);
     }
 
