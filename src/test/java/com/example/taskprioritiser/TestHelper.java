@@ -21,7 +21,6 @@ public class TestHelper {
 // Should be injecting clock in service and then mocking
     public static Clock fixedClock = Clock.fixed(Instant.parse("2222-06-01T13:00:00Z"), ZoneOffset.UTC);
 
-    @Getter
     @AllArgsConstructor
     public enum Temporality {
         PAST(Instant::minus, -1), FUTURE(Instant::plus, 1);

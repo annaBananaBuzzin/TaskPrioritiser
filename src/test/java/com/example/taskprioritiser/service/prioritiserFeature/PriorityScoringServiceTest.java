@@ -18,6 +18,8 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static com.example.taskprioritiser.TestHelper.Temporality.FUTURE;
+import static com.example.taskprioritiser.TestHelper.Temporality.PAST;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
 
@@ -29,6 +31,8 @@ import java.time.temporal.TemporalUnit;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+// TODO mock deadline properties service
 
 @ExtendWith(MockitoExtension.class)
 class PriorityScoringServiceTest {
@@ -157,7 +161,7 @@ class PriorityScoringServiceTest {
     @Test
     void getTaskPriority_ShouldReturnCorrectPriority_WithPastDeadline() {
         //With
-        Task task = createTaskWithDeadline(Instant::minus, 4, ChronoUnit.DAYS);
+        Task task = createTaskWithDeadline(PAST, 4, ChronoUnit.DAYS);
 
         // When
         TaskPriority taskPriority = priorityScoringService.getTaskPriority(task, now);
@@ -178,10 +182,10 @@ class PriorityScoringServiceTest {
     @Test
     void getTaskPriority_ShouldBeInfluencedByPastDeadlineMoreThanFuture() {
         //With tasks becoming more overdue
-        Task oneDayOverDueTask = createTaskWithDeadline(Instant::minus, 1, ChronoUnit.DAYS);
-        Task twoDaysOverDueTask = createTaskWithDeadline(Instant::minus, 2, ChronoUnit.DAYS);
-        Task fourDaysOverDueTask = createTaskWithDeadline(Instant::minus, 4, ChronoUnit.DAYS);
-        Task oneWeekOverDueTask = createTaskWithDeadline(Instant::minus, 7, ChronoUnit.DAYS);
+        Task oneDayOverDueTask = createTaskWithDeadline(PAST, 1, ChronoUnit.DAYS);
+        Task twoDaysOverDueTask = createTaskWithDeadline(PAST, 2, ChronoUnit.DAYS);
+        Task fourDaysOverDueTask = createTaskWithDeadline(PAST, 4, ChronoUnit.DAYS);
+        Task oneWeekOverDueTask = createTaskWithDeadline(PAST, 7, ChronoUnit.DAYS);
 
         // When priority score calculated
         // Then should have non-linear decrease in priority score
@@ -211,9 +215,9 @@ class PriorityScoringServiceTest {
         });
 
         //With tasks with deadlines moving further into the future
-        Task oneDayToDoTask = createTaskWithDeadline(Instant::plus, 1, ChronoUnit.DAYS);
-        Task fourDaysToDoTask = createTaskWithDeadline(Instant::plus, 4, ChronoUnit.DAYS);
-        Task oneWeekToDoTask = createTaskWithDeadline(Instant::plus, 7, ChronoUnit.DAYS);
+        Task oneDayToDoTask = createTaskWithDeadline(FUTURE, 1, ChronoUnit.DAYS);
+        Task fourDaysToDoTask = createTaskWithDeadline(FUTURE, 4, ChronoUnit.DAYS);
+        Task oneWeekToDoTask = createTaskWithDeadline(FUTURE, 7, ChronoUnit.DAYS);
 
         // When priority score calculated
         // Then future deadlines should have a proportionate impact
@@ -240,7 +244,7 @@ class PriorityScoringServiceTest {
     @Test
     void getTaskPriority_ShouldReturnCorrectPriority_WithSameDayDeadline() {
         //With
-        Task task = createTaskWithDeadline(Instant::plus, 2, ChronoUnit.HOURS);
+        Task task = createTaskWithDeadline(FUTURE, 2, ChronoUnit.HOURS);
 
         // When
         TaskPriority priorityScore = priorityScoringService.getTaskPriority(task, now);
@@ -259,7 +263,7 @@ class PriorityScoringServiceTest {
     @Test
     void getTaskPriority_ShouldReturnCorrectPriority_WithSameDayOverdueDeadline() {
         //With
-        Task task = createTaskWithDeadline(Instant::minus, 2, ChronoUnit.HOURS);
+        Task task = createTaskWithDeadline(PAST, 2, ChronoUnit.HOURS);
 
         // When
         TaskPriority priorityScore = priorityScoringService.getTaskPriority(task, now);
@@ -278,9 +282,9 @@ class PriorityScoringServiceTest {
     @Test
     void getTaskPriority_ShouldReturnCorrectPriority_WithSamePriorityForOverdueTodayDeadline() {
         //With tasks becoming more overdue
-        Task oneHourOverDueTask = createTaskWithDeadline(Instant::minus, 1, ChronoUnit.HOURS);
-        Task fourHourssOverDueTask = createTaskWithDeadline(Instant::minus, 4, ChronoUnit.HOURS);
-        Task sevenHourssOverDueTask = createTaskWithDeadline(Instant::minus, 7, ChronoUnit.HOURS);
+        Task oneHourOverDueTask = createTaskWithDeadline(PAST, 1, ChronoUnit.HOURS);
+        Task fourHourssOverDueTask = createTaskWithDeadline(PAST, 4, ChronoUnit.HOURS);
+        Task sevenHourssOverDueTask = createTaskWithDeadline(PAST, 7, ChronoUnit.HOURS);
 
         // When priority score calculated
         // Then overdue same day deadlines should have a proportionate impact
@@ -312,7 +316,7 @@ class PriorityScoringServiceTest {
                 .withDeadline(TestHelper.createTime(Instant::minus, 3, ChronoUnit.HOURS))
                 .withImpactScore(8)
                 .build();
-        Task task2 = createTaskWithDeadline(Instant::minus, 7, ChronoUnit.HOURS);
+        Task task2 = createTaskWithDeadline(PAST, 7, ChronoUnit.HOURS);
 
 
         TaskPriority taskPriority1 = priorityScoringService.getTaskPriority(task1, now);
@@ -328,8 +332,8 @@ class PriorityScoringServiceTest {
         });
     }
 
-    private Task createTaskWithDeadline(TriFunction<Instant, Long, TemporalUnit, Instant> operator, long amount, TemporalUnit unit) {
-        Instant deadline = TestHelper.createTime(operator, amount, unit);
+    private Task createTaskWithDeadline(TestHelper.Temporality temporality, long amount, TemporalUnit unit) {
+        Instant deadline = temporality.createTime(amount, unit);
         return TestTaskBuilder.create().withDeadline(deadline).build();
     }
 
