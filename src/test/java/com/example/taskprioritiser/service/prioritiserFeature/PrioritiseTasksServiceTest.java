@@ -1,5 +1,6 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.prioritiserFeature;
 
+import com.example.taskprioritiser.service.TestTaskPriorityBuilder;
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.model.TaskPriority;
 import com.example.taskprioritiser.service.prioritserFeature.PrioritiseTasksService;

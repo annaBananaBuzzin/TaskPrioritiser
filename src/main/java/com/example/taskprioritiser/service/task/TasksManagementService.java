@@ -1,19 +1,44 @@
 package com.example.taskprioritiser.service.task;
 
+import com.example.taskprioritiser.repsoitory.DoneTaskPersistenceService;
+import com.example.taskprioritiser.repsoitory.DoneTaskProjection;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
 import com.example.taskprioritiser.service.model.Task;
+import com.example.taskprioritiser.service.prioritserFeature.DeadlineProperties;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class TasksManagementService {
 
     private final TaskPersistenceService taskPersistenceService;
 
-    public TasksManagementService(TaskPersistenceService taskPersistenceService) {
+    private final DoneTaskPersistenceService doneTaskPersistenceService;
+
+    public TasksManagementService(TaskPersistenceService taskPersistenceService, DoneTaskPersistenceService doneTaskPersistenceService) {
         this.taskPersistenceService = taskPersistenceService;
+        this.doneTaskPersistenceService = doneTaskPersistenceService;
+    }
+
+    public void markTaskAsDone(Long taskID) {
+        if (taskPersistenceService.getTask(taskID).isEmpty()) {
+            throw new NoSuchElementException("Task not found with ID: " + taskID);
+        }
+        doneTaskPersistenceService.saveDoneTask(taskID);
+    }
+
+    public void unmarkTaskAsDone(Long taskID) {
+        if (taskPersistenceService.getTask(taskID).isEmpty()) {
+            throw new NoSuchElementException("Task not found with ID: " + taskID);
+        }
+        doneTaskPersistenceService.deleteDoneTask(taskID);
     }
 
     public List<Task> getAllTasks() {
@@ -22,6 +47,22 @@ public class TasksManagementService {
                 .toList();
     }
 
-    // get all tasks not done
-    // got all tasks due today not done
+    public List<Task> getAllOutstandingTasks() {
+        return doneTaskPersistenceService.fetchAllNotDoneTasks().stream()
+                .map(EntityTaskMapper::toService)
+                .toList();
+    }
+
+    public List<Task> getAllOutstandingTasksDueToday() {
+        LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
+        return doneTaskPersistenceService.fetchAllNotDoneTasks().stream()
+                .filter(task -> {
+                    DeadlineProperties deadlineProperties = new DeadlineProperties(task.getDeadline(), now);
+                    return deadlineProperties.isToday();
+                })
+                .map(EntityTaskMapper::toService)
+                .toList();
+    }
+
+
 }

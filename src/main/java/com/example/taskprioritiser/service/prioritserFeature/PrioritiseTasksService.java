@@ -29,6 +29,7 @@ public class PrioritiseTasksService {
                 // get task priority properties
                 .map(task -> priorityScoringService.getTaskPriority(task, now))
                 // group tasks by whether they are due today
+                // this should be in task management service
                 .collect(Collectors.partitioningBy(TaskPriority::isToday,
                         Collectors.collectingAndThen(Collectors.toList(),
                                 taskPriorities -> taskPriorities.stream()

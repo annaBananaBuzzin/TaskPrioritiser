@@ -1,9 +1,8 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.task;
 
 import com.example.taskprioritiser.repsoitory.TaskEntity;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.model.*;
-import com.example.taskprioritiser.service.task.TaskDetailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

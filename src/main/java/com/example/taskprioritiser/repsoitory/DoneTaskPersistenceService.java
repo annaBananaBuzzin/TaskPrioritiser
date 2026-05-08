@@ -15,7 +15,7 @@ public class DoneTaskPersistenceService {
     public DoneTaskPersistenceService(DoneTaskRepository doneTaskRepository) {
         this.doneTaskRepository = doneTaskRepository;
     }
-    // Service layer to handle if invalid taskID
+
     @Transactional
     public void saveDoneTask(Long taskID) {
             DoneTaskEntity doneTaskEntity=  new DoneTaskEntity(taskID, Instant.now());
@@ -23,13 +23,11 @@ public class DoneTaskPersistenceService {
         doneTaskRepository.save(doneTaskEntity);
     }
 
-    // Service layer to handle if invalid taskID
     @Transactional
     public boolean isTaskDone(Long taskID) {
         return doneTaskRepository.isTaskDone(taskID);
     }
 
-    // Service layer to handle if invalid taskID
     @Transactional
     public void deleteDoneTask(Long taskID) {
         doneTaskRepository.deleteByTaskId(taskID);

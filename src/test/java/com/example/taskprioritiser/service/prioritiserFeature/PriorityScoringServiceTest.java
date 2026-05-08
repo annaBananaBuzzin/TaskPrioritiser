@@ -1,7 +1,8 @@
-package com.example.taskprioritiser.service;
+package com.example.taskprioritiser.service.prioritiserFeature;
 
 import com.example.taskprioritiser.PrioritiserConfig;
 import com.example.taskprioritiser.TestHelper;
+import com.example.taskprioritiser.service.TestTaskBuilder;
 import com.example.taskprioritiser.service.model.ScoreType;
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.model.TaskPriority;

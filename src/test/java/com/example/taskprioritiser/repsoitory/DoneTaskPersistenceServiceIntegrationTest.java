@@ -60,6 +60,12 @@ class DoneTaskPersistenceServiceIntegrationTest {
         assertDoesNotThrow(() -> underTest.saveDoneTask(nonExistingTaskId));
     }
 
+    @Test
+    void saveDoneTask_thatIsAlreadyMarkedAsDone_ShouldNotThrow() {
+        underTest.saveDoneTask(task1Id);
+        assertDoesNotThrow(() -> underTest.saveDoneTask(task1Id));
+    }
+
 
     @Test
     void isTaskDone() {

@@ -16,6 +16,7 @@ public class DeadlineProperties {
     private final boolean isToday;
     private final Duration durationUntilDeadline;
 
+// shouldn't really be in the constructur should have a matching service
     public DeadlineProperties(Instant deadline, LocalDateTime now) {
         LocalDateTime deadlineDateTime = instantToLocalDateTime(deadline);
         this.isToday = deadlineDateTime.toLocalDate().equals(now.toLocalDate());

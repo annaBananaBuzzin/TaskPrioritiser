@@ -14,12 +14,12 @@ public class TaskPersistenceService {
     private final TaskRepository taskRepository;
 
     public TaskPersistenceService(TaskRepository taskRepository) {
-          this.taskRepository = taskRepository;
-     }
+        this.taskRepository = taskRepository;
+    }
 
-     @Transactional
+    @Transactional
     public Long createTask(TaskEntity taskEntity) {
-         validateUniqueDescription(taskEntity.getDescription());
+        validateUniqueDescription(taskEntity.getDescription());
         TaskEntity saved = taskRepository.save(taskEntity);
         return saved.getTaskId();
     }
@@ -48,7 +48,7 @@ public class TaskPersistenceService {
 
     @Transactional
     public void deleteTask(Long taskID) {
-    // If task doesn't exist this is will be silent
+        // If task doesn't exist this is will be silent
         taskRepository.deleteById(taskID);
     }
 
