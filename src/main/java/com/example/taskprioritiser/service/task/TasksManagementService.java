@@ -6,6 +6,7 @@ import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.prioritserFeature.DeadlineProperties;
+import com.example.taskprioritiser.service.prioritserFeature.DeadlinePropertiesService;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -22,9 +23,12 @@ public class TasksManagementService {
 
     private final DoneTaskPersistenceService doneTaskPersistenceService;
 
-    public TasksManagementService(TaskPersistenceService taskPersistenceService, DoneTaskPersistenceService doneTaskPersistenceService) {
+    private final DeadlinePropertiesService deadlinePropertiesService;
+
+    public TasksManagementService(TaskPersistenceService taskPersistenceService, DoneTaskPersistenceService doneTaskPersistenceService, DeadlinePropertiesService deadlinePropertiesService) {
         this.taskPersistenceService = taskPersistenceService;
         this.doneTaskPersistenceService = doneTaskPersistenceService;
+        this.deadlinePropertiesService = deadlinePropertiesService;
     }
 
     public void markTaskAsDone(Long taskID) {
@@ -57,12 +61,23 @@ public class TasksManagementService {
         LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
         return doneTaskPersistenceService.fetchAllNotDoneTasks().stream()
                 .filter(task -> {
-                    DeadlineProperties deadlineProperties = new DeadlineProperties(task.getDeadline(), now);
+                    DeadlineProperties deadlineProperties = deadlinePropertiesService.getDeadlineProperties(task.getDeadline(), now);
                     return deadlineProperties.isToday();
                 })
                 .map(EntityTaskMapper::toService)
                 .toList();
     }
 
+        public List<Task> getAllOutstandingTasksOverdue() {
+//        LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
+//        return doneTaskPersistenceService.fetchAllNotDoneTasks().stream()
+//                .filter(task -> {
+//                    DeadlineProperties deadlineProperties = deadlinePropertiesService.getDeadlineProperties(task.getDeadline(), now);
+//                    return deadlineProperties.isToday();
+//                })
+//                .map(EntityTaskMapper::toService)
+//                .toList();
+return List.of();
+    }
 
 }

@@ -1,10 +1,12 @@
 package com.example.taskprioritiser.service.task;
 
+import com.example.taskprioritiser.TestHelper;
 import com.example.taskprioritiser.repsoitory.DoneTaskPersistenceService;
 import com.example.taskprioritiser.repsoitory.DoneTaskProjection;
 import com.example.taskprioritiser.repsoitory.TaskEntity;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.model.Task;
+import org.assertj.core.util.TriFunction;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -149,8 +153,34 @@ class TasksManagementServiceTest {
         verify(doneTaskPersistenceService).fetchAllNotDoneTasks();
     }
 
+        @Test
+    void getAllOutstandingTasksDueToday_ShouldReturnListOfOutstandingTasksDueToday() {
+        // With
+        TaskEntity entity1 = createTaskWithDeadline(1L, Instant::plus, 2, ChronoUnit.DAYS);
+
+        TaskEntity entity2 = createTaskWithDeadline(1L, Instant::plus, 2, ChronoUnit.DAYS);
+        TaskEntity entity3 = createTaskWithDeadline(1L, Instant::plus, 2, ChronoUnit.DAYS);
+        TaskEntity entity4 = createTaskWithDeadline(1L, Instant::plus, 2, ChronoUnit.DAYS);
+        List<TaskEntity> entities = List.of(entity1, entity2, entity3, entity4);
+        when(doneTaskPersistenceService.fetchAllNotDoneTasks()).thenReturn(entities);
+
+        // When
+        List<Task> result = underTest.getAllOutstandingTasks();
+
+        // Then
+        assertThat(result).hasSize(4)
+                .extracting(Task::getTaskId)
+                .containsAll(List.of(1L, 2L, 3L, 4L));
+        verify(doneTaskPersistenceService).fetchAllNotDoneTasks();
+    }
     // can fetch list of and filter to only show tasks due today
     // can fetch and filter out all tasks if none due today
+
+
+    private TaskEntity createTaskWithDeadline(Long taskId, TriFunction<Instant, Long, TemporalUnit, Instant> operator, long amount, TemporalUnit unit) {
+    Instant deadline = TestHelper.createTime(operator, amount, unit);
+        return new TaskEntity(taskId, "Task description", 5, 4, 2, deadline);
+    }
 
     private TaskEntity createTask(Long taskId) {
         return new TaskEntity(taskId, "Task description", 5, 4, 2, Instant.now().plusSeconds(3600));

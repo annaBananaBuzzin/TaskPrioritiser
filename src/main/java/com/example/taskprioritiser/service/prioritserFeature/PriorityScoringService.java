@@ -12,6 +12,12 @@ import java.util.Map;
 @Service
 public class PriorityScoringService {
 
+private final DeadlinePropertiesService deadlinePropertiesService;
+
+    public PriorityScoringService(DeadlinePropertiesService deadlinePropertiesService) {
+        this.deadlinePropertiesService = deadlinePropertiesService;
+    }
+
     public TaskPriority getTaskPriority(Task task, LocalDateTime now) {
 
         Map<ScoreType, Integer> scoreWeights = PrioritiserConfig.getScoreWeightMap();
@@ -25,9 +31,9 @@ public class PriorityScoringService {
             return new TaskPriority(task, benefitScore + reliefScore);
         }
 
-        DeadlineProperties deadlineProperties = new DeadlineProperties(deadline, now);
+        DeadlineProperties deadlineProperties = deadlinePropertiesService.getDeadlineProperties(deadline, now);
         // relief includes quick wins and overdue tasks that are not being prioritised
-        double reliefScore = task.getEffortScore().calculateWeightedScore(scoreWeights) / deadlineProperties.getDeadlineVariable();
+        double reliefScore = task.getEffortScore().calculateWeightedScore(scoreWeights) / deadlinePropertiesService.getDeadlineVariable(deadlineProperties);
 
         return new TaskPriority(task, deadlineProperties.isToday(), benefitScore + reliefScore);
     }

@@ -6,6 +6,7 @@ import com.example.taskprioritiser.service.TestTaskBuilder;
 import com.example.taskprioritiser.service.model.ScoreType;
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.model.TaskPriority;
+import com.example.taskprioritiser.service.prioritserFeature.DeadlinePropertiesService;
 import com.example.taskprioritiser.service.prioritserFeature.PriorityScoringService;
 import org.assertj.core.util.TriFunction;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
@@ -38,6 +40,11 @@ class PriorityScoringServiceTest {
             ScoreType.URGENCY, 3
     );
 
+    // inject until tested separtely
+    // curently testing is being done within this test
+    @Autowired
+    private DeadlinePropertiesService deadlinePropertiesService;
+
     @InjectMocks
     private PriorityScoringService priorityScoringService;
     private MockedStatic<PrioritiserConfig> configMock;
@@ -49,7 +56,9 @@ class PriorityScoringServiceTest {
         configMock.when(PrioritiserConfig::getScoreWeightMap).thenReturn(weightMap);
         configMock.when(PrioritiserConfig::getDayDeadlineConstant).thenReturn(3);
 
-        priorityScoringService = new PriorityScoringService();
+        // why is this happening?
+        deadlinePropertiesService = new DeadlinePropertiesService();
+        priorityScoringService = new PriorityScoringService(deadlinePropertiesService);
         now = Instant.now(TestHelper.fixedClock).atZone(ZoneId.of("UTC")).toLocalDateTime();
     }
 
