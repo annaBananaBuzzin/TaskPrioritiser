@@ -68,16 +68,15 @@ public class TasksManagementService {
                 .toList();
     }
 
-        public List<Task> getAllOutstandingTasksOverdue() {
-//        LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
-//        return doneTaskPersistenceService.fetchAllNotDoneTasks().stream()
-//                .filter(task -> {
-//                    DeadlineProperties deadlineProperties = deadlinePropertiesService.getDeadlineProperties(task.getDeadline(), now);
-//                    return deadlineProperties.isToday();
-//                })
-//                .map(EntityTaskMapper::toService)
-//                .toList();
-return List.of();
+    public List<Task> getAllOverdueTasks() {
+        LocalDateTime now = Instant.now().atZone(ZoneId.of("UTC")).toLocalDateTime();
+        return doneTaskPersistenceService.fetchAllNotDoneTasks().stream()
+                .filter(task -> {
+                    DeadlineProperties deadlineProperties = deadlinePropertiesService.getDeadlineProperties(task.getDeadline(), now);
+                    return deadlineProperties.isOverdue();
+                })
+                .map(EntityTaskMapper::toService)
+                .toList();
     }
 
 }

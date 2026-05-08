@@ -12,6 +12,9 @@ import java.time.ZoneId;
 public class DeadlinePropertiesService {
 
     public DeadlineProperties getDeadlineProperties(Instant deadline, LocalDateTime now) {
+        if (deadline == null) {
+            return new DeadlineProperties(false, null);
+        }
         LocalDateTime dateTimeDeadline = instantToLocalDateTime(deadline);
 
         boolean isToday = dateTimeDeadline.toLocalDate().equals(now.toLocalDate());
@@ -20,21 +23,17 @@ public class DeadlinePropertiesService {
 
         return new DeadlineProperties(isToday, durationUntilDeadline);
     }
-        public double getDeadlineVariable(DeadlineProperties deadlineProperties) {
+
+    public double getDeadlineVariable(DeadlineProperties deadlineProperties) {
         return deadlineProperties.isToday() ? getTimeDueVariable(deadlineProperties.getDurationUntilDeadline()) : getDateDueVariable(deadlineProperties.getDurationUntilDeadline());
     }
 
-    // is overdue
-
     private LocalDateTime instantToLocalDateTime(Instant instant) {
-        if (instant == null) {
-            throw new IllegalArgumentException("Instant cannot be null");
-        }
         // Improve time zone handling
         return instant.atZone(ZoneId.of("UTC")).toLocalDateTime();
     }
 
-        private double getTimeDueVariable(Duration duration) {
+    private double getTimeDueVariable(Duration duration) {
         long hours = duration.toHours();
         return (hours < 0 ? 0 : hours) + 1;
     }

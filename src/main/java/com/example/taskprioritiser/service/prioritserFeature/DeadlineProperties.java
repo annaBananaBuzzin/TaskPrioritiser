@@ -16,4 +16,8 @@ public class DeadlineProperties {
         this.durationUntilDeadline = durationUntilDeadline;
     }
 
+    public boolean isOverdue() {
+        return durationUntilDeadline.isNegative();
+    }
+
 }
