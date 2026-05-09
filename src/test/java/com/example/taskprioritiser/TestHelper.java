@@ -38,15 +38,6 @@ public class TestHelper {
         }
     }
 
-    public static Instant createTime(
-            TriFunction<Instant, Long, TemporalUnit, Instant> operator,
-            long amount,
-            TemporalUnit unit
-    ) {
-        return operator.apply(Instant.now(fixedClock), amount, unit);
-    }
-
-
     public static List<Task> getDefaultTasks() {
         return List.of(
                 TestTaskBuilder.create().withTaskId(1L).build(),

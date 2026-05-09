@@ -1,7 +1,7 @@
 package com.example.taskprioritiser.api;
 
 import com.example.taskprioritiser.api.dto.TaskResponse;
-import com.example.taskprioritiser.service.prioritserFeature.PrioritiseTasksService;
+import com.example.taskprioritiser.service.prioritiserFeature.PrioritiseTasksService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,5 +21,13 @@ public class PrioritiserController implements PrioritiserResource {
         return List.of();
 //        prioritiseTasksService.prioritiseTasks().stream()
 //                .map(ServiceTaskMapper::ToResponse).toList();
+    }
+
+            @Override
+    public List<TaskResponse> getAllTasks() {
+        return List.of();
+        taskDetailService.getAllTasks().stream()
+                .map(ServiceTaskMapper::ToResponse)
+                .toList();
     }
 }

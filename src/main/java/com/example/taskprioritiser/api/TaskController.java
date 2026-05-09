@@ -6,6 +6,7 @@ import com.example.taskprioritiser.api.dto.TaskResponse;
 import com.example.taskprioritiser.api.dto.UpdateDescriptionRequest;
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.task.TaskDetailService;
+import com.example.taskprioritiser.service.task.TasksManagementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +21,11 @@ public class TaskController implements TaskResource {
 
     private final TaskDetailService taskDetailService;
 
-    public TaskController(TaskDetailService taskDetailService) {
+    private final TasksManagementService tasksManagementService;
+
+    public TaskController(TaskDetailService taskDetailService, TasksManagementService tasksManagementService) {
         this.taskDetailService = taskDetailService;
+        this.tasksManagementService = tasksManagementService;
     }
 
     @Override
@@ -29,14 +33,6 @@ public class TaskController implements TaskResource {
     // Add test that the POJO can't be created if scores aren't valid
         Task createdTask = taskDetailService.createTask(ServiceTaskMapper.fromCreationRequest(taskRequest));
         return ServiceTaskMapper.ToResponse(createdTask);
-    }
-
-    @Override
-    public List<TaskResponse> getAllTasks() {
-        return List.of();
-//        taskDetailService.getAllTasks().stream()
-//                .map(ServiceTaskMapper::ToResponse)
-//                .toList();
     }
 
     @Override
@@ -63,6 +59,17 @@ public class TaskController implements TaskResource {
     public void deleteTask(Long id) {
         taskDetailService.deleteTask(id);
     }
+
+    @Override
+    public void markTaskAsDone(Long id) {
+
+    }
+
+    @Override
+    public void markTaskAsUndone(Long id) {
+
+    }
+
 
     @Override
     public ErrorResponse handleNoSuchElementException(NoSuchElementException ex) {

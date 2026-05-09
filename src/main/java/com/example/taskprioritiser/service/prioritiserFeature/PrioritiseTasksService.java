@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service.prioritserFeature;
+package com.example.taskprioritiser.service.prioritiserFeature;
 
 import com.example.taskprioritiser.service.model.Task;
 import com.example.taskprioritiser.service.model.TaskPriority;

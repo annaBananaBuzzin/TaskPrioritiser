@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service.prioritserFeature;
+package com.example.taskprioritiser.service.prioritiserFeature;
 
 import com.example.taskprioritiser.PrioritiserConfig;
 
@@ -7,8 +7,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-
-// TODO TEST
 public class DeadlinePropertiesService {
 
     public DeadlineProperties getDeadlineProperties(Instant deadline, LocalDateTime now) {

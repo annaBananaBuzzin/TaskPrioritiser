@@ -1,15 +1,13 @@
 package com.example.taskprioritiser.service.task;
 
 import com.example.taskprioritiser.repsoitory.DoneTaskPersistenceService;
-import com.example.taskprioritiser.repsoitory.DoneTaskProjection;
 import com.example.taskprioritiser.repsoitory.TaskPersistenceService;
 import com.example.taskprioritiser.service.mapper.EntityTaskMapper;
 import com.example.taskprioritiser.service.model.Task;
-import com.example.taskprioritiser.service.prioritserFeature.DeadlineProperties;
-import com.example.taskprioritiser.service.prioritserFeature.DeadlinePropertiesService;
+import com.example.taskprioritiser.service.prioritiserFeature.DeadlineProperties;
+import com.example.taskprioritiser.service.prioritiserFeature.DeadlinePropertiesService;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

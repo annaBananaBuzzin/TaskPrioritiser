@@ -1,4 +1,4 @@
-package com.example.taskprioritiser.service.prioritserFeature;
+package com.example.taskprioritiser.service.prioritiserFeature;
 
 import com.example.taskprioritiser.PrioritiserConfig;
 import com.example.taskprioritiser.service.model.ScoreType;
@@ -12,7 +12,7 @@ import java.util.Map;
 @Service
 public class PriorityScoringService {
 
-private final DeadlinePropertiesService deadlinePropertiesService;
+    private final DeadlinePropertiesService deadlinePropertiesService;
 
     public PriorityScoringService(DeadlinePropertiesService deadlinePropertiesService) {
         this.deadlinePropertiesService = deadlinePropertiesService;

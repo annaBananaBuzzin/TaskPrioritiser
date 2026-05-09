@@ -19,10 +19,6 @@ public interface TaskResource {
     @ResponseBody
     TaskResponse createTask(@Valid @RequestBody TaskRequest taskRequest);
 
-    @GetMapping
-    @ResponseBody
-    List<TaskResponse> getAllTasks();
-
     @GetMapping("/{id}")
     @ResponseBody
     TaskResponse getTask(@PathVariable Long id);
@@ -38,6 +34,12 @@ public interface TaskResource {
 
     @DeleteMapping("/{id}")
     void deleteTask(@PathVariable Long id);
+
+    @PutMapping("/{id}/done")
+    void markTaskAsDone(@PathVariable Long id);
+
+        @PutMapping("/{id}/undone")
+    void markTaskAsUndone(@PathVariable Long id);
 
     @ExceptionHandler(value = NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
