@@ -11,11 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.NoSuchElementException;
 
-
 // TODO move mapping to service layer
+// TODO test
 @RestController
 public class TaskController implements TaskResource {
 
@@ -62,14 +61,13 @@ public class TaskController implements TaskResource {
 
     @Override
     public void markTaskAsDone(Long id) {
-
+        tasksManagementService.markTaskAsDone(id);
     }
 
     @Override
-    public void markTaskAsUndone(Long id) {
-
+    public void unmarkTaskAsDone(Long id) {
+        tasksManagementService.unmarkTaskAsDone(id);
     }
-
 
     @Override
     public ErrorResponse handleNoSuchElementException(NoSuchElementException ex) {

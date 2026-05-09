@@ -26,4 +26,5 @@ public class PrioritiserService {
         List<Task> outstandingTasksDueToday = tasksManagementService.getAllOutstandingTasksDueToday();
         return prioritiseTasksService.prioritiseTasks(outstandingTasksDueToday);
     }
+
 }

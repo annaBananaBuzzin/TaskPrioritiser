@@ -1,9 +1,7 @@
 package com.example.taskprioritiser.api;
 
-import com.example.taskprioritiser.api.dto.TaskRequest;
 import com.example.taskprioritiser.api.dto.TaskResponse;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -28,7 +26,4 @@ public interface PrioritiserResource {
     @ResponseBody
     List<TaskResponse> getAllOutstandingTasksDueTodayPrioritised();
 
-    @GetMapping
-    @ResponseBody
-    List<TaskResponse> getPrioritisedListOfTasks(@RequestBody List<TaskRequest> taskRequests);
 }

@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 @RequestMapping("/task")
@@ -38,8 +37,8 @@ public interface TaskResource {
     @PutMapping("/{id}/done")
     void markTaskAsDone(@PathVariable Long id);
 
-        @PutMapping("/{id}/undone")
-    void markTaskAsUndone(@PathVariable Long id);
+    @PutMapping("/{id}/undone")
+    void unmarkTaskAsDone(@PathVariable Long id);
 
     @ExceptionHandler(value = NoSuchElementException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

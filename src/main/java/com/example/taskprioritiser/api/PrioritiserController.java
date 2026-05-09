@@ -1,7 +1,8 @@
 package com.example.taskprioritiser.api;
 
 import com.example.taskprioritiser.api.dto.TaskResponse;
-import com.example.taskprioritiser.service.prioritiserFeature.PrioritiseTasksService;
+import com.example.taskprioritiser.service.prioritiserFeature.PrioritiserService;
+import com.example.taskprioritiser.service.task.TasksManagementService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -10,24 +11,40 @@ import java.util.List;
 public class PrioritiserController implements PrioritiserResource {
     // TODO intergration test only
 
-    private final PrioritiseTasksService prioritiseTasksService;
+    private final PrioritiserService prioritiserService;
+    private final TasksManagementService tasksManagementService;
 
-    public PrioritiserController(PrioritiseTasksService prioritiseTasksService) {
-        this.prioritiseTasksService = prioritiseTasksService;
+    public PrioritiserController(PrioritiserService prioritiserService, TasksManagementService tasksManagementService) {
+        this.prioritiserService = prioritiserService;
+        this.tasksManagementService = tasksManagementService;
     }
 
     @Override
-    public List<TaskResponse> getAllTasksPrioritised() {
-        return List.of();
-//        prioritiseTasksService.prioritiseTasks().stream()
-//                .map(ServiceTaskMapper::ToResponse).toList();
-    }
-
-            @Override
     public List<TaskResponse> getAllTasks() {
-        return List.of();
-        taskDetailService.getAllTasks().stream()
+        return tasksManagementService.getAllTasks().stream()
                 .map(ServiceTaskMapper::ToResponse)
                 .toList();
     }
+
+    @Override
+    public List<TaskResponse> getAllOverdueTasks() {
+        return tasksManagementService.getAllOverdueTasks().stream()
+                .map(ServiceTaskMapper::ToResponse)
+                .toList();
+    }
+
+    @Override
+    public List<TaskResponse> getAllOutstandingTasksPrioritised() {
+        return prioritiserService.getOutstandingTasksPrioritised().stream()
+                .map(ServiceTaskMapper::ToResponse)
+                .toList();
+    }
+
+    @Override
+    public List<TaskResponse> getAllOutstandingTasksDueTodayPrioritised() {
+        return prioritiserService.getOutstandingTasksDueTodayPrioritised().stream()
+                .map(ServiceTaskMapper::ToResponse)
+                .toList();
+    }
+
 }
